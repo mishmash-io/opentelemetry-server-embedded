@@ -16,3 +16,7 @@ buildNumber.properties
 .project
 # JDT-specific (Eclipse Java Development Tools)
 .classpath
+
+*.asc
+*.md5
+*.sha1
