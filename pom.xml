@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright 2024 Mishmash IO UK Ltd.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>io.mishmash.opentelemetry</groupId>
+  <artifactId>opentelemetry-server-embedded</artifactId>
+  <version>1.0.0</version>
+  <packaging>pom</packaging>
+
+  <name>OpenTelemetry Data Sources for Java</name>
+  <description>
+    OpenTelemetry logs, metrics and traces data sources for various Java-based systems. 
+  </description>
+  <url>https://mishmash.io/open_source/opentelemetry</url>
+
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    </license>
+  </licenses>
+
+  <organization>
+    <name>mishmash io</name>
+    <url>https://mishmash.io</url>
+  </organization>
+
+  <scm>
+    <connection>scm:git:https://github.com/mishmash-io/opentelemetry-server-embedded.git</connection>
+    <developerConnection>scm:git:https://github.com/mishmash-io/opentelemetry-server-embedded.git</developerConnection>
+    <url>https://github.com/mishmash-io/opentelemetry-server-embedded</url>
+  </scm>
+
+  <developers>
+    <developer>
+      <name>Ivan Kountchev</name>
+      <email>i.kountchev@mishmash.io</email>
+      <organization>mishmash io</organization>
+      <organizationUrl>https://mishmash.io</organizationUrl>
+      <roles>
+        <role>developer</role>
+      </roles>
+    </developer>
+    <developer>
+      <name>Andrey Rusev</name>
+      <email>a.rusev@mishmash.io</email>
+      <url>www.linkedin.com/in/andrey-rusev-21894172</url>
+      <organization>mishmash io</organization>
+      <organizationUrl>https://mishmash.io</organizationUrl>
+      <roles>
+        <role>architect</role>
+      </roles>
+    </developer>
+  </developers>
+
+  <properties>
+    <protobuf.version>3.25.3</protobuf.version>
+    <vertx.version>4.5.5</vertx.version>
+    <opentelemetry.version>1.36.0</opentelemetry.version>
+    <opentelemetry.proto.version>1.1.0-alpha</opentelemetry.proto.version>
+  </properties>
+
+  <modules>
+    <module>collector-embedded</module>
+    <module>server-parquet</module>
+  </modules>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-web</artifactId>
+        <version>${vertx.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-grpc-server</artifactId>
+        <version>${vertx.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.protobuf</groupId>
+        <artifactId>protobuf-java</artifactId>
+        <version>${protobuf.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.protobuf</groupId>
+        <artifactId>protobuf-java-util</artifactId>
+        <version>${protobuf.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.opentelemetry</groupId>
+        <artifactId>opentelemetry-api</artifactId>
+        <version>${opentelemetry.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.opentelemetry.proto</groupId>
+        <artifactId>opentelemetry-proto</artifactId>
+        <version>${opentelemetry.proto.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.11.0</version>
+          <configuration>
+            <source>17</source>
+            <target>17</target>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-source-plugin</artifactId>
+          <version>3.3.0</version>
+          <executions>
+            <execution>
+              <id>sources-jar</id>
+              <goals>
+                <goal>jar</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>3.6.3</version>
+          <executions>
+            <execution>
+              <id>javadoc-jar</id>
+              <goals>
+                <goal>jar</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-checkstyle-plugin</artifactId>
+          <version>3.3.1</version>
+          <configuration>
+            <excludeGeneratedSources>true</excludeGeneratedSources>
+            <configLocation>mod_sun_checks.xml</configLocation>
+          </configuration>
+          <executions>
+            <execution>
+              <id>checkstyle</id>
+              <goals>
+                <goal>check</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>

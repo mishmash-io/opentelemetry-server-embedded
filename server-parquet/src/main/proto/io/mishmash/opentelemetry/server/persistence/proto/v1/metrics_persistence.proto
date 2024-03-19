@@ -1,0 +1,120 @@
+//
+//    Copyright 2024 Mishmash IO UK Ltd.
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
+
+syntax = "proto3";
+
+package io.mishmash.opentelemetry.server.parquet.persistence.proto.v1;
+
+import "opentelemetry/proto/common/v1/common.proto";
+import "opentelemetry/proto/metrics/v1/metrics.proto";
+
+option java_package = "io.mishmash.opentelemetry.server.parquet.persistence.proto.v1";
+option java_outer_classname = "MetricsPersistenceProto";
+
+message PersistedMetric {
+  // OTLP messages are essentially collections of entries (logs, metrics or traces) and a batch is 
+  // one such collection. For each of these 'batches' (or messages) a timestamp (batch_timestamp) 
+  // is recorded - noting when it was received, and also an UUID is generated and written to batch_UUID.
+  // Additionally, each entry in a batch will have its index recorded in seq_no.
+  // Together these fields can be used to, say, de-flatten data in SQL queries or something.
+  int64 batch_timestamp = 1;
+  string batch_UUID = 2;
+  int32 seq_no = 3;
+
+  // The following are extracted from opentelemetry.proto.resource.v1.Resource if it is present
+  repeated .opentelemetry.proto.common.v1.KeyValue resource_attributes = 4;
+  uint32 resource_dropped_attributes_count = 5;
+
+  // The Schema URL, if known. This is the identifier of the Schema that the resource data
+  // is recorded in. To learn more about Schema URL see
+  // https://opentelemetry.io/docs/specs/otel/schemas/#schema-url
+  // This schema_url applies to the data in the "resource" field. It does not apply
+  // to the data in the "scope_logs" field which have their own schema_url field.
+  string resource_schema_url = 6;
+
+  // The following are extracted from opentelemetry.proto.common.v1.InstrumentationScope
+  string scope_name = 7;
+  string scope_version = 8;
+  repeated .opentelemetry.proto.common.v1.KeyValue scope_attributes = 9;
+  uint32 scope_dropped_attributes_count = 10;
+
+  // The following are extracted from opentelemetry.proto.metrics.v1.Metric
+  string name = 11;
+  string description = 12;
+  string unit = 13;
+
+  // specifies the type of the metric - GAUGE, SUM, HISTOGRAM, EXPONENTIAL_HISTOGRAM, SUMMARY
+  string type = 14;
+
+  // the index of the data point in the metric's data points array
+  int32 datapoint_seq_no = 15;
+
+  // extracted from the data point and common to all types
+  repeated .opentelemetry.proto.common.v1.KeyValue attributes = 16;
+  fixed64 start_time_unix_nano = 17;
+  fixed64 time_unix_nano = 18;
+  // not available in SUMMARY data point
+  repeated .opentelemetry.proto.metrics.v1.Exemplar exemplars = 19;
+  uint32 flags = 20;
+
+  // extracted from opentelemetry.proto.metrics.v1.NumberDataPoint when type = GAUGE
+  optional string gauge_type = 21;
+  optional double gauge_double = 22;
+  optional sfixed64 gauge_int = 23;
+
+  // extracted from opentelemetry.proto.metrics.v1.NumberDataPoint when type = SUM
+  optional string sum_type = 24;
+  optional double sum_double = 25;
+  optional sfixed64 sum_int = 26;
+
+  // extracted from opentelemetry.proto.metrics.v1.HistogramDataPoint when type = HISTOGRAM
+  optional fixed64 histogram_count = 27;
+  optional double histogram_sum = 28;
+  repeated fixed64 histogram_bucket_counts = 29;
+  repeated double histogram_explicit_bounds = 30;
+  optional double histogram_min = 31;
+  optional double histogram_max = 32;
+
+  // extracted from opentelemetry.proto.metrics.v1.ExponentialHistogramDataPoint when type = EXPONENTIAL_HISTOGRAM
+  optional fixed64 exponential_histogram_count = 33;
+  optional double exponential_histogram_sum = 34;
+  optional sint32 exponential_histogram_scale = 35;
+  optional fixed64 exponential_histogram_zero_count = 36;
+  optional .opentelemetry.proto.metrics.v1.ExponentialHistogramDataPoint.Buckets exponential_histogram_positive = 37;
+  optional .opentelemetry.proto.metrics.v1.ExponentialHistogramDataPoint.Buckets exponential_histogram_negative = 38;
+  optional double exponential_histogram_min = 39;
+  optional double exponential_histogram_max = 40;
+  optional double exponential_histogram_zero_threshold = 41;
+
+  // extracted from opentelemetry.proto.metrics.v1.SummaryDataPoint when type = SUMMARY
+  optional fixed64 summary_count = 42;
+  optional double summary_sum = 43;
+  repeated .opentelemetry.proto.metrics.v1.SummaryDataPoint.ValueAtQuantile summary_quantile_values = 44;
+  
+  optional .opentelemetry.proto.metrics.v1.AggregationTemporality aggregation_temporality = 45;
+  optional bool is_monotonic = 46;
+
+  // The Schema URL, if known. This is the identifier of the Schema that the log data
+  // is recorded in. To learn more about Schema URL see
+  // https://opentelemetry.io/docs/specs/otel/schemas/#schema-url
+  string metric_schema_url = 47;
+
+  // is_valid will be false if the system found this record to not comply with OTLP specs.
+  bool is_valid = 48;
+
+  // when is_valid is false, error_message will provide some information on what was wrong.
+  string error_message = 49;
+}
