@@ -13,3 +13,8 @@ This is the first public release of code we have accumulated internally over tim
 what we intend to share. Future releases will add modules for authentication and authorization, visualization and more.
 
 Watch this repository for updates.
+
+Also take a look at the READMEs of the individual packages in this repository:
+
+- [embeddable OpenTelemetry collectors](./collector-embedded)
+- [Apache Parquet Stand-alone server](./server-parquet)
