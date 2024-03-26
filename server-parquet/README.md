@@ -38,6 +38,23 @@ collect telemetry from your unit and code tests. Visit [our docs page](https://m
 But, if you've got something else in mind, here's how to use the
 code contained here to launch the parquet server.
 
+Using Podman or Docker to run in a container:
+
+1. Pull from Docker Hub:
+    ```bash
+    docker pull mishmashio/opentelemetry-parquet-server
+    ```
+    ```bash
+    podman pull mishmashio/opentelemetry-parquet-server
+    ```
+2. Launch ***(Note: Change /path/on/host/where/to/save/files to a directory on your computer where you want to save OpenTelemetry data)***
+    ```bash
+    docker run -p 4317:4317 -p 4318:4318 -v /path/on/host/where/to/save/files:/parquet:z mishmashio/opentelemetry-parquet-server
+    ```
+    ```bash
+    podman run -p 4317:4317 -p 4318:4318 --mount=type=bind,src=/path/on/host/where/to/save/files,dst=/parquet,relabel=shared mishmashio/opentelemetry-parquet-server
+    ```
+
 Using Apache Maven:
 
 1. Clone this repository
@@ -89,3 +106,23 @@ If you don't set this environment variable files will be saved in the current wo
 ## About the code
 
 This server, and especially its [CollectorsMain class](src/main/java/io/mishmash/opentelemetry/server/parquet/CollectorsMain.java) is a simple example on how to implement and embed more complex OpenTelemetry data sources with the help of [our OpenTelemetry embeddable collectors.](../collector-embedded/)
+
+### Compiling
+
+Do not build this package directly unless absolutely necessary. Instead, build the [parent project.](../README.md)
+
+### Building the Docker image
+
+To build the Docker image:
+1. Make sure the code here is compiled (see above).
+2. Get the dependencies as they have to be copied to the container image:
+    ```bash
+    mvn dependecy:copy-dependencies
+    ```
+3. Build the image with podman or docker:
+    ```bash
+    docker build -f Dockerfile
+    ```
+    ```bash
+    podman build -f Dockerfile
+    ```
