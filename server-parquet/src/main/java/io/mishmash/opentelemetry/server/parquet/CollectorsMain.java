@@ -22,13 +22,16 @@ import java.util.logging.Logger;
 
 import io.mishmash.opentelemetry.server.collector.LogsCollector;
 import io.mishmash.opentelemetry.server.collector.MetricsCollector;
+import io.mishmash.opentelemetry.server.collector.ProfilesCollector;
 import io.mishmash.opentelemetry.server.collector.TracesCollector;
 import io.mishmash.opentelemetry.server.collector.Instrumentation;
 import io.opentelemetry.proto.collector.logs.v1.LogsServiceGrpc;
 import io.opentelemetry.proto.collector.metrics.v1.MetricsServiceGrpc;
+import io.opentelemetry.proto.collector.profiles.v1experimental.ProfilesServiceGrpc;
 import io.opentelemetry.proto.collector.trace.v1.TraceServiceGrpc;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Launcher;
+import io.vertx.core.http.HttpServerOptions;
 import io.vertx.ext.web.AllowForwardHeaders;
 import io.vertx.ext.web.Router;
 import io.vertx.grpc.server.GrpcServer;
@@ -75,6 +78,11 @@ public class CollectorsMain extends AbstractVerticle {
      */
     private TracesCollector tracesCollector =
             new TracesCollector(TraceServiceGrpc.getExportMethod(), otel);
+    /**
+     * The OpenTelemetry profiles collector.
+     */
+    private ProfilesCollector profilesCollector =
+            new ProfilesCollector(ProfilesServiceGrpc.getExportMethod(), otel);
 
     /**
      * Stops all OpenTelemetry collectors and closes them.
@@ -98,6 +106,12 @@ public class CollectorsMain extends AbstractVerticle {
             tracesCollector.close();
         } catch (Exception e) {
             LOG.log(Level.SEVERE, "Failed to close traces collector", e);
+        }
+
+        try {
+            profilesCollector.close();
+        } catch (Exception e) {
+            LOG.log(Level.SEVERE, "Failed to close profiles collector", e);
         }
     }
 
@@ -129,6 +143,9 @@ public class CollectorsMain extends AbstractVerticle {
             String spansPrefix = basePath
                     + "traces"
                     + "-" + currentTimestamp;
+            String profilesPrefix = basePath
+                    + "profiles-experimental"
+                    + "-" + currentTimestamp;
 
             FileLogs persistentLogs =
                     new FileLogs(logsPrefix, otel);
@@ -136,10 +153,13 @@ public class CollectorsMain extends AbstractVerticle {
                     new FileMetrics(metricsPrefix, otel);
             FileSpans persistentSpans =
                     new FileSpans(spansPrefix, otel);
+            FileProfiles persistentProfiles =
+                    new FileProfiles(profilesPrefix, otel);
 
             logsCollector.subscribe(persistentLogs);
             metricsCollector.subscribe(persistentMetrics);
             tracesCollector.subscribe(persistentSpans);
+            profilesCollector.subscribe(persistentProfiles);
 
             LOG.log(Level.INFO,
                     "Collecting logs to files: "
@@ -153,6 +173,10 @@ public class CollectorsMain extends AbstractVerticle {
                     "Collecting traces to files: "
                             + spansPrefix
                             + "*.parquet");
+            LOG.log(Level.INFO,
+                    "Collecting profiles to files: "
+                            + profilesPrefix
+                            + "*.parquet");
         } catch (Exception e) {
             LOG.log(Level.SEVERE, "Failed to attach otel collectors", e);
 
@@ -164,6 +188,7 @@ public class CollectorsMain extends AbstractVerticle {
         logsCollector.bind(grpcServer);
         metricsCollector.bind(grpcServer);
         tracesCollector.bind(grpcServer);
+        profilesCollector.bind(grpcServer);
 
         vertx.createHttpServer()
             .requestHandler(grpcServer)
@@ -186,8 +211,12 @@ public class CollectorsMain extends AbstractVerticle {
         logsCollector.bind(router);
         metricsCollector.bind(router);
         tracesCollector.bind(router);
+        profilesCollector.bind(router);
 
-        vertx.createHttpServer()
+        vertx.createHttpServer(
+                new HttpServerOptions()
+                    .setCompressionSupported(true)
+                    .setDecompressionSupported(true))
             .requestHandler(router)
             .listen(DEFAULT_HTTP_PORT)
             .onSuccess(server -> LOG.info(

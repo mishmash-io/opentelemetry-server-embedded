@@ -20,7 +20,7 @@
   <parent>
     <groupId>io.mishmash.opentelemetry</groupId>
     <artifactId>opentelemetry-server-embedded</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
   </parent>
 
   <artifactId>server-parquet</artifactId>
@@ -28,7 +28,7 @@
 
   <name>Stand-alone OpenTelemetry data source for Apache Parquet files</name>
   <description>
-    A stand-alone OpenTelemetry server that collects logs, metrics and traces into Apache Parquet files.
+    A stand-alone OpenTelemetry server that collects logs, metrics, traces and profiles into Apache Parquet files.
   </description>
   <url>https://mishmash.io/open_source/opentelemetry</url>
 
@@ -73,8 +73,8 @@
   </developers>
 
   <properties>
-    <parquet.version>1.13.1</parquet.version>
-    <hadoop.version>3.3.6</hadoop.version>
+    <parquet.version>1.14.1</parquet.version>
+    <hadoop.version>3.4.0</hadoop.version>
   </properties>
 
   <build>

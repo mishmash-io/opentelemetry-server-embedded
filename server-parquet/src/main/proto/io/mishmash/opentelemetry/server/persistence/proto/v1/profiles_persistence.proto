@@ -1,0 +1,174 @@
+//
+//    Copyright 2024 Mishmash IO UK Ltd.
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
+
+syntax = "proto3";
+
+package io.mishmash.opentelemetry.server.parquet.persistence.proto.v1;
+
+import "opentelemetry/proto/common/v1/common.proto";
+import "opentelemetry/proto/profiles/v1experimental/profiles.proto";
+import "opentelemetry/proto/profiles/v1experimental/pprofextended.proto";
+
+option java_package = "io.mishmash.opentelemetry.server.parquet.persistence.proto.v1";
+option java_outer_classname = "ProfilesPersistenceProto";
+
+message PersistedProfile {
+  // OTLP messages are essentially collections of entries (logs, metrics, etc) and a batch is 
+  // one such collection. For each of these 'batches' (or messages) a timestamp (batch_timestamp) 
+  // is recorded - noting when it was received, and also an UUID is generated and written to batch_UUID.
+  // Additionally, each entry in a batch will have indexes within the resource profile,
+  // the scope profile, the profile itself, the sample and an index of a value.
+  // Together these indices can be used to, say, de-flatten data in SQL queries or something.
+  int64 batch_timestamp = 1;
+  string batch_UUID = 2;
+  int32 resource_seq_no = 3;
+
+  // The following are extracted from opentelemetry.proto.resource.v1.Resource if it is present
+  repeated .opentelemetry.proto.common.v1.KeyValue resource_attributes = 4;
+  uint32 resource_dropped_attributes_count = 5;
+
+  // The Schema URL, if known. This is the identifier of the Schema that the resource data
+  // is recorded in. To learn more about Schema URL see
+  // https://opentelemetry.io/docs/specs/otel/schemas/#schema-url
+  // This schema_url applies to the data in the "resource" field. It does not apply
+  // to the data in the "scope_logs" field which have their own schema_url field.
+  string resource_schema_url = 6;
+
+  // the scope sequence num within the current profile resource.
+  int32 scope_seq_no = 7;
+
+  // The following are extracted from opentelemetry.proto.common.v1.InstrumentationScope
+  string scope_name = 8;
+  string scope_version = 9;
+  repeated .opentelemetry.proto.common.v1.KeyValue scope_attributes = 10;
+  uint32 scope_dropped_attributes_count = 11;
+
+  string profile_schema_url = 12;
+
+  // the sequence number of this profile within its parent scope profile.
+  int32 profile_seq_no = 13;
+
+  // The following are extracted from opentelemetry.proto.profiles.v1experimental.ProfileContainer
+  bytes profile_id = 14;
+  fixed64 start_time_unix_nano = 15;
+  fixed64 end_time_unix_nano = 16;
+  repeated .opentelemetry.proto.common.v1.KeyValue profile_attributes = 17;
+  uint32 profile_dropped_attributes_count = 18;
+  string original_payload_format = 19;
+  bytes original_payload = 20;
+  
+  // The following are extracted from opentelemetry.proto.profiles.v1experimental.Profile
+  string drop_frames = 21;
+  string keep_frames = 22;
+  int64 time_nanos = 23;
+  int64 duration_nanos = 24;
+  StrValueType period_type = 25;
+  int64 period = 26;
+  repeated string comment = 27;
+  string default_sample_type = 28;
+
+  // The sequence number of the sample (inside its parent profile).
+  int32 sample_seq_no = 29;
+
+  // The following are extracted from opentelemetry.proto.profiles.v1experimental.Sample
+  string stacktrace_id = 30;
+  repeated StrLocation locations = 31;
+  repeated StrLabel labels = 32;
+  repeated KeyValueUnit attributes = 33;
+  repeated uint64 timestamps_unix_nano = 34;
+
+  // The following are extracted from the Sample link field.
+  bytes trace_id = 35;
+  bytes span_id = 36;
+
+  // The sequence number of a value of the given Sample.
+  int32 value_seq_no = 37;
+
+  // the value itself
+  int64 value = 38;
+
+  // the value type
+  StrValueType type = 39;
+
+  // is_valid will be false if the system found this record to not comply with OTLP specs.
+  bool is_valid = 40;
+
+  // when is_valid is false, error_message will provide some information on what was wrong.
+  string error_message = 41;
+}
+
+// An opentelemetry.proto.profiles.v1experimental.ValueType with extracted strings
+message StrValueType {
+  string type = 1;
+  string unit = 2;
+
+  .opentelemetry.proto.profiles.v1experimental.AggregationTemporality aggregation_temporality = 3;
+}
+
+// An opentelemetry.proto.profiles.v1experimental.Label with extracted strings
+message StrLabel {
+  string key = 1;
+  string str = 2;
+  int64 num = 3;
+  string num_unit = 4;
+}
+
+// An opentelemetry.proto.common.v1.KeyValue with extracted unit
+message KeyValueUnit {
+  string key = 1;
+  .opentelemetry.proto.common.v1.AnyValue value = 2;
+  optional string unit = 3;
+}
+
+// An opentelemetry.proto.profiles.v1experimental.Function with extracted strings
+message StrFunction {
+  string name = 1;
+  string system_name = 2;
+  string filename = 3;
+  int64 start_line = 4;
+}
+
+// An opentelemetry.proto.profiles.v1experimental.Line, resolved
+message StrLine {
+  StrFunction function = 1;
+  int64 line = 2;
+  int64 column = 3;
+}
+
+// An opentelemetry.proto.profiles.v1experimental.Line, resolved
+message StrMapping {
+  uint64 memory_start = 1;
+  uint64 memory_limit = 2;
+  uint64 file_offset = 3;
+  string filename = 4;
+  string build_id = 5;
+  .opentelemetry.proto.profiles.v1experimental.BuildIdKind build_id_kind = 6;
+  repeated KeyValueUnit attributes = 7;
+  bool has_functions = 8;
+  bool has_filenames = 9;
+  bool has_line_numbers = 10;
+  bool has_inline_frames = 11;
+}
+
+// A Location (within a stack trace) with extracted strings, mappings, etc...
+message StrLocation {
+  StrMapping mapping = 1;
+  uint64 address = 2;
+  repeated StrLine lines = 3;
+  bool is_folded = 4;
+  string type = 5;
+  repeated KeyValueUnit attributes = 6;
+}

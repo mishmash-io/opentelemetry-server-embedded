@@ -19,6 +19,8 @@ package io.mishmash.opentelemetry.server.parquet;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -35,6 +37,11 @@ import com.google.protobuf.Message;
  * @param <T> the output message class
  */
 public class ParquetPersistence<T extends Message> implements Closeable {
+
+    /**
+     * Parquet metadata environment variables prefix.
+     */
+    protected static final String ENV_META_PREFIX = "PARQUET_META_";
 
     /**
      * Default parquet file row group size.
@@ -86,6 +93,14 @@ public class ParquetPersistence<T extends Message> implements Closeable {
      * write to the current output file.
      */
     private ParquetWriter<T> currentWriter;
+    /**
+     * Holds metadata to be stored in a file.
+     */
+    private Map<String, String> meta;
+    /**
+     * An object used for locking during rotaions.
+     */
+    private Object rotationLock = new Object();
 
     /**
      * Create a new parquet persister instance and open its first
@@ -105,6 +120,7 @@ public class ParquetPersistence<T extends Message> implements Closeable {
         this.baseFileName = fileNamePrefix;
         this.messageClass = persistedMessageClass;
 
+        collectMeta();
         openWriter(rotations);
     }
 
@@ -143,6 +159,7 @@ public class ParquetPersistence<T extends Message> implements Closeable {
                 .withWriteMode(Mode.CREATE)
                 .withRowGroupSize(DEFAULT_ROW_GROUP_SIZE)
                 .withPageWriteChecksumEnabled(false)
+                .withExtraMetaData(meta)
                 .build();
 
         currentNumWritten = 0;
@@ -152,6 +169,10 @@ public class ParquetPersistence<T extends Message> implements Closeable {
     /**
      * Closes the current output file and renames it from its staging
      * to its final name.
+     *
+     * NOTE: Must be called with a lock on {@link rotationLock}
+     * until {@link currentWriter} is replaced with a new writer
+     * or a null.
      *
      * @throws IOException if the file system encounters and error
      */
@@ -198,8 +219,10 @@ public class ParquetPersistence<T extends Message> implements Closeable {
      * cleanly of the new one cannot be open for writing
      */
     protected void rotate() throws IOException {
-        closeWriter();
-        openWriter(++rotations);
+        synchronized (rotationLock) {
+            closeWriter();
+            openWriter(++rotations);
+        }
     }
 
     /**
@@ -228,6 +251,25 @@ public class ParquetPersistence<T extends Message> implements Closeable {
     }
 
     /**
+     * Initializes the file metadata.
+     */
+    protected void collectMeta() {
+        Map<String, String> env = System.getenv();
+
+        this.meta = new HashMap<>();
+
+        for (String varName : env.keySet()) {
+            if (varName.startsWith(ENV_META_PREFIX)) {
+                String metaKey = varName.substring(ENV_META_PREFIX.length());
+
+                if (!metaKey.isBlank()) {
+                    this.meta.put(metaKey, System.getenv(varName));
+                }
+            }
+        }
+    }
+
+    /**
      * Closes this persister and releases the currently open
      * file (if any).
      *
@@ -236,8 +278,10 @@ public class ParquetPersistence<T extends Message> implements Closeable {
     @Override
     public void close() throws IOException {
         if (currentWriter != null) {
-            closeWriter();
-            currentWriter = null;
+            synchronized (rotationLock) {
+                closeWriter();
+                currentWriter = null;
+            }
         }
     }
 
@@ -275,6 +319,10 @@ public class ParquetPersistence<T extends Message> implements Closeable {
      * @return number of bytes written so far to the current file only
      */
     public long getCurrentDataSize() {
-        return currentWriter == null ? 0 : currentWriter.getDataSize();
+        synchronized (rotationLock) {
+            return currentWriter == null
+                    ? 0
+                    : currentWriter.getDataSize();
+        }
     }
 }
