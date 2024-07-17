@@ -254,6 +254,11 @@ public class FileMetrics implements MetricsSubscriber {
                     builder = builder.setType(metric.getType().name());
                 }
 
+                if (metric.getMetaData() != null) {
+                    builder = builder
+                            .addAllMetricMetadata(metric.getMetaData());
+                }
+
                 switch (metric.getType()) {
                 case EXPONENTIAL_HISTOGRAM:
                     ExponentialHistogramDataPoint ehdp =

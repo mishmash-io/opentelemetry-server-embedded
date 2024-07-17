@@ -112,9 +112,12 @@ message PersistedMetric {
   // https://opentelemetry.io/docs/specs/otel/schemas/#schema-url
   string metric_schema_url = 47;
 
+  // Additional metadata attributes that describe the metric, optional.
+  repeated .opentelemetry.proto.common.v1.KeyValue metric_metadata = 48;
+
   // is_valid will be false if the system found this record to not comply with OTLP specs.
-  bool is_valid = 48;
+  bool is_valid = 49;
 
   // when is_valid is false, error_message will provide some information on what was wrong.
-  string error_message = 49;
+  string error_message = 50;
 }

@@ -1,6 +1,6 @@
 # Stand-alone OpenTelemetry Server
 
-This simple stand-alone server launches the [embeddable collectors](../collector-embedded) for OpenTelemetry (logs, metrics and traces) and saves the received signals in Apache Parquet files.
+This simple stand-alone server launches the [embeddable collectors](../collector-embedded) for OpenTelemetry (logs, metrics, traces and profiles) and saves the received signals in Apache Parquet files.
 
 It's intended to be used locally when running tests on the local
 computer or as a simple way to collect telemetry and analyze it
@@ -11,7 +11,7 @@ locally when you are sure your networks are safe!
 
 ## Why saving OpenTelemetry to parquet files?
 
-Once you've collected some files you can launch a local Apache Druid and Apache Superset to explore your logs, metrics and traces. Or you can launch a quick python notebook and use the
+Once you've collected some files you can launch a local Apache Druid and Apache Superset to explore your logs, metrics, traces and profiles. Or you can launch a quick python notebook and use the
 files in a Pandas DataFrame.
 
 To find out more about how we use it (and get some extra tools) - see our [OpenTelemetry at mishmash io docs here.](https://mishmash.io/open_source/opentelemetry)
@@ -28,7 +28,10 @@ columns for simplicity when querying.
 Details about each file schema can be found in its protobuf spec
  - [log file spec](src/main/proto/io/mishmash/opentelemetry/server/persistence/proto/v1/logs_persistence.proto),
  - [metric data point file spec](src/main/proto/io/mishmash/opentelemetry/server/persistence/proto/v1/metrics_persistence.proto) and
- - [span file spec](src/main/proto/io/mishmash/opentelemetry/server/persistence/proto/v1/traces_persistence.proto).
+ - [span file spec](src/main/proto/io/mishmash/opentelemetry/server/persistence/proto/v1/traces_persistence.proto)
+ - [profile file spec](src/main/proto/io/mishmash/opentelemetry/server/persistence/proto/v1/profiles_persistence.proto).
+
+***Warning:*** The OpenTelemetry profiles signal is still considered **experimental!**
 
 ## Using the server
 
@@ -69,8 +72,7 @@ Using Apache Maven:
 
 ## Experimenting with OpenTelemetry
 
-This server is also instrumented with OpenTelemetry and can produce its own logs, metrics and traces. Meaning - for a very
-quick way to collect some telemetry data your can plug-in the
+This server is also instrumented with OpenTelemetry and can produce its own logs, metrics and traces (but no profiles!). Meaning - for a very quick way to collect some telemetry data your can plug-in the
 OpenTelemetry java agent and point it back to this server.
 
 This will effectively save this server's telemetry in the output parquet files. It's not a very good idea as receiving its own telemetry will make the server produce even more telemetry, but it can be a very quick way to get some OpenTelemetry data.
@@ -102,6 +104,14 @@ export PARQUET_LOCATION="/new/location"
 ```
 
 If you don't set this environment variable files will be saved in the current working directory of the jvm.
+
+Also, you can extend each parquet file with custom metadata by setting your own environment variables. Just prefix their names with `PARQUET_META_`, like this:
+
+```bash
+export PARQUET_META_my_variable="my_value"
+```
+
+The above will add `my_variable=my_value` to the list of parquet extra file metadata fields. You can set a number of such variables and later use the saved metadata to identify related parquet files.
 
 ## About the code
 

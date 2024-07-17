@@ -17,8 +17,11 @@
 
 package io.mishmash.opentelemetry.server.collector;
 
+import java.util.List;
+
 import io.opentelemetry.context.Context;
 import io.opentelemetry.proto.common.v1.InstrumentationScope;
+import io.opentelemetry.proto.common.v1.KeyValue;
 import io.opentelemetry.proto.metrics.v1.AggregationTemporality;
 import io.opentelemetry.proto.metrics.v1.ExponentialHistogram;
 import io.opentelemetry.proto.metrics.v1.ExponentialHistogramDataPoint;
@@ -133,6 +136,11 @@ public class MetricDataPoint extends SubscribersBatch<MetricDataPoint> {
     private String errorMessage;
 
     /**
+     * Metadata of the metric data point.
+     */
+    private List<KeyValue> metaData;
+
+    /**
      * Create a new empty metric data point.
      *
      * @param parent parent {@link Batch}
@@ -180,6 +188,7 @@ public class MetricDataPoint extends SubscribersBatch<MetricDataPoint> {
         this.unit = metric.getUnit();
         this.type = metric.getDataCase();
         this.metricSchemaUrl = scopeMetric.getSchemaUrl();
+        this.metaData = metric.getMetadataList();
 
         this.aggregationTemporality =
                 otelExponentialHistogram.getAggregationTemporality();
@@ -225,6 +234,7 @@ public class MetricDataPoint extends SubscribersBatch<MetricDataPoint> {
         this.unit = metric.getUnit();
         this.type = metric.getDataCase();
         this.metricSchemaUrl = scopeMetric.getSchemaUrl();
+        this.metaData = metric.getMetadataList();
 
         this.datapointSeqNo = dpSeqNo;
         this.gauge = dp;
@@ -268,6 +278,7 @@ public class MetricDataPoint extends SubscribersBatch<MetricDataPoint> {
         this.unit = metric.getUnit();
         this.type = metric.getDataCase();
         this.metricSchemaUrl = scopeMetric.getSchemaUrl();
+        this.metaData = metric.getMetadataList();
 
         this.aggregationTemporality =
                 otelHistogram.getAggregationTemporality();
@@ -313,6 +324,7 @@ public class MetricDataPoint extends SubscribersBatch<MetricDataPoint> {
         this.unit = metric.getUnit();
         this.type = metric.getDataCase();
         this.metricSchemaUrl = scopeMetric.getSchemaUrl();
+        this.metaData = metric.getMetadataList();
 
         this.isMonotonic = otelSum.getIsMonotonic();
         this.aggregationTemporality = otelSum.getAggregationTemporality();
@@ -358,6 +370,7 @@ public class MetricDataPoint extends SubscribersBatch<MetricDataPoint> {
         this.unit = metric.getUnit();
         this.type = metric.getDataCase();
         this.metricSchemaUrl = scopeMetric.getSchemaUrl();
+        this.metaData = metric.getMetadataList();
 
         this.datapointSeqNo = seqNo;
         this.summary = dp;
@@ -555,5 +568,14 @@ public class MetricDataPoint extends SubscribersBatch<MetricDataPoint> {
      */
     public String getErrorMessage() {
         return errorMessage;
+    }
+
+    /**
+     * Get the metric meta data.
+     *
+     * @return metric meta data as a list of {@link KeyValue}s.
+     */
+    public List<KeyValue> getMetaData() {
+        return metaData;
     }
 }
