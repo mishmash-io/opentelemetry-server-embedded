@@ -36,6 +36,7 @@ import io.opentelemetry.proto.metrics.v1.Sum;
 import io.opentelemetry.proto.metrics.v1.Summary;
 import io.opentelemetry.proto.metrics.v1.SummaryDataPoint;
 import io.opentelemetry.proto.resource.v1.Resource;
+import io.vertx.ext.auth.User;
 
 /**
  * Holds the details of an individual OTLP metric data point
@@ -146,11 +147,13 @@ public class MetricDataPoint extends SubscribersBatch<MetricDataPoint> {
      * @param parent parent {@link Batch}
      * @param otelContext {@link io.opentelemetry.context.Context} for own
      * telemetry
+     * @param authUser the authenticated user or null if auth wasn't enabled
      */
     public MetricDataPoint(
             final Batch<MetricDataPoint> parent,
-            final Context otelContext) {
-        super(parent, otelContext);
+            final Context otelContext,
+            final User authUser) {
+        super(parent, otelContext, authUser);
     }
 
     /**

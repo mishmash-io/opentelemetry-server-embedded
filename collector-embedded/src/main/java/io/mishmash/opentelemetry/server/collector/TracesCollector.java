@@ -30,6 +30,7 @@ import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest;
 import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceResponse;
 import io.opentelemetry.proto.trace.v1.ResourceSpans;
 import io.opentelemetry.proto.trace.v1.ScopeSpans;
+import io.vertx.core.Vertx;
 
 /**
  * Processes incoming OpenTelemetry traces packets - extracts individual
@@ -109,7 +110,9 @@ public class TracesCollector
                                 getInstrumentation()
                                     .startNewSpan("otel.record");
 
-                        Span s = new Span(batch, otelContext);
+                        Span s = new Span(batch,
+                                otelContext,
+                                Vertx.currentContext().get(VCTX_EMITTER));
                         s.setFrom(
                                 timestamp,
                                 uuid,
