@@ -23,6 +23,7 @@ import io.opentelemetry.proto.logs.v1.LogRecord;
 import io.opentelemetry.proto.logs.v1.ResourceLogs;
 import io.opentelemetry.proto.logs.v1.ScopeLogs;
 import io.opentelemetry.proto.resource.v1.Resource;
+import io.vertx.ext.auth.User;
 
 /**
  * Holds the details of an individual OTLP log record
@@ -80,9 +81,13 @@ public class Log extends SubscribersBatch<Log> {
      * @param parent parent {@link Batch}
      * @param otelContext {@link io.opentelemetry.context.Context} for own
      * telemetry
+     * @param authUser the authenticated user or null if auth wasn't enabled
      */
-    public Log(final Batch<Log> parent, final Context otelContext) {
-        super(parent, otelContext);
+    public Log(
+            final Batch<Log> parent,
+            final Context otelContext,
+            final User authUser) {
+        super(parent, otelContext, authUser);
     }
 
     /**

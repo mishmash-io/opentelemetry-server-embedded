@@ -22,6 +22,7 @@ import io.opentelemetry.proto.common.v1.InstrumentationScope;
 import io.opentelemetry.proto.resource.v1.Resource;
 import io.opentelemetry.proto.trace.v1.ResourceSpans;
 import io.opentelemetry.proto.trace.v1.ScopeSpans;
+import io.vertx.ext.auth.User;
 
 /**
  * Holds the details of an individual OTLP span record
@@ -79,9 +80,13 @@ public class Span extends SubscribersBatch<Span> {
      * @param parent parent {@link Batch}
      * @param otelContext {@link io.opentelemetry.context.Context} for own
      * telemetry
+     * @param authUser the authenticated user or null if auth wasn't enabled
      */
-    public Span(final Batch<Span> parent, final Context otelContext) {
-        super(parent, otelContext);
+    public Span(
+            final Batch<Span> parent,
+            final Context otelContext,
+            final User authUser) {
+        super(parent, otelContext, authUser);
     }
 
     /**

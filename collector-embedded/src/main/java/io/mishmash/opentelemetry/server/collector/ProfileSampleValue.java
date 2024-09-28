@@ -25,6 +25,7 @@ import io.opentelemetry.proto.profiles.v1experimental.ResourceProfiles;
 import io.opentelemetry.proto.profiles.v1experimental.Sample;
 import io.opentelemetry.proto.profiles.v1experimental.ScopeProfiles;
 import io.opentelemetry.proto.resource.v1.Resource;
+import io.vertx.ext.auth.User;
 
 /**
  * Holds an individual OTLP Profile Sample value as a {@link Batch}
@@ -115,11 +116,13 @@ public class ProfileSampleValue
      * @param parent the parent {@link Batch}
      * @param otelContext {@link io.opentelemetry.context.Context} for own
      * telemetry
+     * @param authUser the authenticated user or null if auth wasn't enabled
      */
     public ProfileSampleValue(
             final Batch<ProfileSampleValue> parent,
-            final Context otelContext) {
-        super(parent, otelContext);
+            final Context otelContext,
+            final User authUser) {
+        super(parent, otelContext, authUser);
     }
 
     /**

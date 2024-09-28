@@ -32,6 +32,7 @@ import io.opentelemetry.proto.collector.logs.v1.ExportLogsServiceResponse;
 import io.opentelemetry.proto.logs.v1.LogRecord;
 import io.opentelemetry.proto.logs.v1.ResourceLogs;
 import io.opentelemetry.proto.logs.v1.ScopeLogs;
+import io.vertx.core.Vertx;
 
 /**
  * Processes incoming OpenTelemetry logs packets - extracts individual
@@ -108,7 +109,9 @@ public class LogsCollector
                         Span recordSpan = getInstrumentation()
                                 .startNewSpan("otel.record");
 
-                        Log l = new Log(batch, Context.current());
+                        Log l = new Log(batch,
+                                Context.current(),
+                                Vertx.currentContext().get(VCTX_EMITTER));
                         l.setFrom(
                                 timestamp,
                                 uuid,

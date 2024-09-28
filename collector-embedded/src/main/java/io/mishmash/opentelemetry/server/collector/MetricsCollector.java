@@ -42,6 +42,7 @@ import io.opentelemetry.proto.metrics.v1.ScopeMetrics;
 import io.opentelemetry.proto.metrics.v1.Sum;
 import io.opentelemetry.proto.metrics.v1.Summary;
 import io.opentelemetry.proto.metrics.v1.SummaryDataPoint;
+import io.vertx.core.Vertx;
 
 /**
  * Processes incoming OpenTelemetry metrics packets - extracts all
@@ -141,7 +142,9 @@ public class MetricsCollector
 
                                 MetricDataPoint m = new MetricDataPoint(
                                         batch,
-                                        Context.current());
+                                        Context.current(),
+                                        Vertx.currentContext()
+                                            .get(VCTX_EMITTER));
                                 m.setFrom(timestamp,
                                         uuid,
                                         seqNo,
@@ -174,7 +177,9 @@ public class MetricsCollector
 
                                 MetricDataPoint m = new MetricDataPoint(
                                         batch,
-                                        Context.current());
+                                        Context.current(),
+                                        Vertx.currentContext()
+                                            .get(VCTX_EMITTER));
                                 m.setFrom(timestamp,
                                         uuid,
                                         seqNo,
@@ -207,7 +212,9 @@ public class MetricsCollector
 
                                 MetricDataPoint m = new MetricDataPoint(
                                         batch,
-                                        Context.current());
+                                        Context.current(),
+                                        Vertx.currentContext()
+                                            .get(VCTX_EMITTER));
                                 m.setFrom(timestamp,
                                         uuid,
                                         seqNo,
@@ -240,7 +247,9 @@ public class MetricsCollector
 
                                 MetricDataPoint m = new MetricDataPoint(
                                         batch,
-                                        Context.current());
+                                        Context.current(),
+                                        Vertx.currentContext()
+                                            .get(VCTX_EMITTER));
                                 m.setFrom(timestamp,
                                         uuid,
                                         seqNo,
@@ -272,7 +281,9 @@ public class MetricsCollector
 
                                 MetricDataPoint m = new MetricDataPoint(
                                         batch,
-                                        Context.current());
+                                        Context.current(),
+                                        Vertx.currentContext()
+                                            .get(VCTX_EMITTER));
                                 m.setFrom(timestamp,
                                         uuid,
                                         seqNo,
