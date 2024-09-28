@@ -34,6 +34,7 @@ import io.opentelemetry.proto.profiles.v1experimental.ProfileContainer;
 import io.opentelemetry.proto.profiles.v1experimental.ResourceProfiles;
 import io.opentelemetry.proto.profiles.v1experimental.Sample;
 import io.opentelemetry.proto.profiles.v1experimental.ScopeProfiles;
+import io.vertx.core.Vertx;
 
 /**
  * Processes incoming OpenTelemetry profiles packets - extracts individual
@@ -137,7 +138,9 @@ public class ProfilesCollector
                                 ProfileSampleValue lv =
                                         new ProfileSampleValue(
                                                 batch,
-                                                Context.current());
+                                                Context.current(),
+                                                Vertx.currentContext()
+                                                    .get(VCTX_EMITTER));
                                 lv.setFrom(
                                         timestamp,
                                         uuid,

@@ -48,11 +48,14 @@ import io.opentelemetry.api.metrics.ObservableLongGauge;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
+import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpVersion;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.grpc.common.GrpcStatus;
@@ -140,6 +143,12 @@ public abstract class AbstractCollector<
      * Routing context parameter key for 'otelContext'.
      */
     private static final String CTX_OTEL_CONTEXT = "otelContext";
+
+    /**
+     * Vertx context parameter key for the user who is sending telemetry
+     * (if authentication was enabled).
+     */
+    public static final String VCTX_EMITTER = "emitter";
 
     /**
      * The helper object for own telemetry.
@@ -482,6 +491,12 @@ public abstract class AbstractCollector<
             Span span = otel.startNewSpan("otel.collect");
             span.setAttribute("otel.transport", transport);
             span.setAttribute("otel.encoding", encoding);
+
+            User user = Vertx.currentContext().get(VCTX_EMITTER);
+            span.setAttribute("otel.is_authenticated", user != null);
+            if (user != null) {
+                setSpanAttributesForUser(span, user);
+            }
 
             minDemand.record(estimateMinimumDemand());
 
@@ -1225,6 +1240,44 @@ public abstract class AbstractCollector<
      */
     protected Context getOtelContext(final RoutingContext ctx) {
         return ctx.get(CTX_OTEL_CONTEXT);
+    }
+
+    /**
+     * Set own-telemetry span attributes when an authenticated
+     * user is present.
+     *
+     * @param span the span to set the attributes to
+     * @param user the authenticated user who is emitting telemetry
+     */
+    protected void setSpanAttributesForUser(
+            final Span span,
+            final User user) {
+        JsonObject principal = user.principal();
+
+        if (principal.containsKey("iss")) {
+            span.setAttribute("otel.auth.issuer",
+                    principal.getString("iss"));
+        }
+
+        if (principal.containsKey("aud")) {
+            span.setAttribute("otel.auth.audience",
+                    principal.getString("aud"));
+        }
+
+        if (principal.containsKey("sub")) {
+            span.setAttribute("otel.auth.subject",
+                    principal.getString("sub"));
+        }
+
+        if (principal.containsKey("azp")) {
+            span.setAttribute("otel.auth.authorized_party",
+                    principal.getString("azp"));
+        }
+
+        if (principal.containsKey("preferred_username")) {
+            span.setAttribute("otel.auth.preferred_username",
+                    principal.getString("preferred_username"));
+        }
     }
 
     /**
