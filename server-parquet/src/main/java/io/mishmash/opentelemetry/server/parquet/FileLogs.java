@@ -25,12 +25,12 @@ import java.util.logging.Logger;
 import io.mishmash.opentelemetry.server.collector.Instrumentation;
 import io.mishmash.opentelemetry.server.collector.Log;
 import io.mishmash.opentelemetry.server.collector.LogsSubscriber;
-import io.mishmash.opentelemetry.server.parquet.persistence.proto.v1.LogsPersistenceProto.PersistedLog;
+import io.mishmash.opentelemetry.persistence.proto.ProtobufLogs;
+import io.mishmash.opentelemetry.persistence.proto.v1.LogsPersistenceProto.PersistedLog;
 import io.opentelemetry.api.metrics.LongCounter;
 import io.opentelemetry.api.metrics.ObservableLongGauge;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.context.Scope;
-import io.opentelemetry.proto.common.v1.AnyValue;
 
 /**
  * Subscribes to incoming OpenTelemetry logs and writes them to parquet
@@ -191,94 +191,10 @@ public class FileLogs implements LogsSubscriber {
 
             try {
                 span.addEvent("Build persisted log");
-                PersistedLog.Builder builder = PersistedLog.newBuilder()
-                        .setBatchTimestamp(log.getBatchTimestamp())
-                        .setBatchUUID(log.getBatchUUID())
-                        .setSeqNo(log.getSeqNo())
-                        .setIsValid(log.isValid());
-
-                if (log.getErrorMessage() != null) {
-                    builder = builder.setErrorMessage(log.getErrorMessage());
-                }
-
-                if (log.getResource() != null) {
-                    builder = builder
-                        .addAllResourceAttributes(
-                                log.getResource().getAttributesList())
-                        .setResourceDroppedAttributesCount(
-                                log.getResource().getDroppedAttributesCount());
-                }
-
-                if (log.getResourceSchemaUrl() != null) {
-                    builder = builder
-                        .setResourceSchemaUrl(log.getResourceSchemaUrl());
-                }
-
-                if (log.getScope() != null) {
-                    builder = builder
-                        .setScopeName(log.getScope().getName())
-                        .setScopeVersion(log.getScope().getVersion())
-                        .addAllScopeAttributes(
-                                log.getScope().getAttributesList())
-                        .setScopeDroppedAttributesCount(
-                                log.getScope().getDroppedAttributesCount());
-                }
-
-                if (log.getLog() != null) {
-                    builder = builder
-                        .setTimeUnixNano(log.getLog().getTimeUnixNano())
-                        .setObservedTimeUnixNano(
-                                log.getLog().getObservedTimeUnixNano())
-                        .setSeverityNumber(log.getLog().getSeverityNumber())
-                        .setSeverityText(log.getLog().getSeverityText())
-                        .addAllAttributes(log.getLog().getAttributesList())
-                        .setDroppedAttributesCount(
-                                log.getLog().getDroppedAttributesCount())
-                        .setFlags(log.getLog().getFlags())
-                        .setTraceId(log.getLog().getTraceId())
-                        .setSpanId(log.getLog().getSpanId());
-
-                    AnyValue body = log.getLog().getBody();
-
-                    builder = builder.setBodyType(body.getValueCase().name());
-
-                    switch (body.getValueCase()) {
-                    case ARRAY_VALUE:
-                        builder = builder.setBodyArray(body.getArrayValue());
-                        break;
-                    case BOOL_VALUE:
-                        builder = builder.setBodyBool(body.getBoolValue());
-                        break;
-                    case BYTES_VALUE:
-                        builder = builder.setBodyBytes(body.getBytesValue());
-                        break;
-                    case DOUBLE_VALUE:
-                        builder = builder.setBodyDouble(body.getDoubleValue());
-                        break;
-                    case INT_VALUE:
-                        builder = builder.setBodyInt(body.getIntValue());
-                        break;
-                    case KVLIST_VALUE:
-                        builder = builder.setBodyKvlist(body.getKvlistValue());
-                        break;
-                    case STRING_VALUE:
-                        builder = builder.setBodyString(body.getStringValue());
-                        break;
-                    case VALUE_NOT_SET:
-                        // FIXME: what to do when not set?
-                        break;
-                    default:
-                        // FIXME: should not ignore
-                        break;
-                    }
-                }
-
-                if (log.getLogSchemaUrl() != null) {
-                    builder = builder.setLogSchemaUrl(log.getLogSchemaUrl());
-                }
-
                 span.addEvent("Write persisted log to file");
-                parquet.write(builder.build());
+                parquet.write(ProtobufLogs
+                        .buildLog(log)
+                        .build());
 
                 numWritten.add(1);
 

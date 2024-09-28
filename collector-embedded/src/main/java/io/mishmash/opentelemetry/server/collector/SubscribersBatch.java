@@ -22,9 +22,10 @@ import java.util.concurrent.Flow.Subscriber;
 import io.opentelemetry.context.Context;
 
 /**
- * A 'batch' of all {@link LogsSubscriber}s, {@link MetricsSubscriber}s
- * or @{link SpansSubscribers} that were given the task to process
- * an OpenTelemetry log record, metric data point or trace span.
+ * A 'batch' of all {@link LogsSubscriber}s, {@link MetricsSubscriber}s,
+ * {@link SpansSubscriber}s or {@link ProfilesSubscriber}s that were given
+ * the task to process an OpenTelemetry log record, metric data point or
+ * trace span.
  *
  * @param <T> the subscriber record type
  */

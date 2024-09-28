@@ -20,8 +20,8 @@
  * <p>
  * This package contains the main classes used to embed OpenTelemetry
  * collectors. Use one or all of {@link LogsCollector},
- * {@link MetricsCollector} and {@link TracesCollector} to create
- * an OTEL data source for your system.
+ * {@link MetricsCollector}, {@link TracesCollector} and
+ * {@link ProfilesCollector} to create an OTEL data source for your system.
  * </p>
  * <p>
  * To use them:
@@ -31,8 +31,9 @@
  * </li>
  * <li>
  * Implement one or more subscribers - {@link LogsSubscriber},
- * {@link MetricsSubscriber}, {@link SpansSubscriber} to receive
- * incoming OpenTelemetry signals of a given type
+ * {@link MetricsSubscriber}, {@link SpansSubscriber},
+ * {@link ProfilesSubscriber} to receive incoming OpenTelemetry signals
+ * of a given type
  * </li>
  * <li>
  * Subscribe them to the collector -
@@ -47,11 +48,12 @@
  *
  * <p>
  * When OTLP clients connect to the server and submit data - each individual
- * data item in them - a log entry, a metric data point or a span - will be
- * delivered to the subscribers' {@link LogsSubscriber#onNext(Log)},
- * {@link MetricsSubscriber#onNext(MetricDataPoint)} or
- * {@link SpansSubscriber#onNext(Span)} where you can make it available
- * within the system you're embedding into.
+ * data item in them - a log entry, a metric data point, a span or a profile -
+ * will be delivered to the subscribers' {@link LogsSubscriber#onNext(Log)},
+ * {@link MetricsSubscriber#onNext(MetricDataPoint)},
+ * {@link SpansSubscriber#onNext(Span)} or
+ * {@link ProfilesSubscriber#onNext(ProfileSampleValue)} where you can make it
+ * available within the system you're embedding into.
  * </p>
  * <p>
  * This package is part of a broader set of OpenTelemetry-related activities
