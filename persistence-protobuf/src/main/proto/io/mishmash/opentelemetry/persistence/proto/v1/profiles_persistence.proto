@@ -16,13 +16,13 @@
 
 syntax = "proto3";
 
-package io.mishmash.opentelemetry.server.parquet.persistence.proto.v1;
+package io.mishmash.opentelemetry.persistence.proto.v1;
 
 import "opentelemetry/proto/common/v1/common.proto";
 import "opentelemetry/proto/profiles/v1experimental/profiles.proto";
 import "opentelemetry/proto/profiles/v1experimental/pprofextended.proto";
 
-option java_package = "io.mishmash.opentelemetry.server.parquet.persistence.proto.v1";
+option java_package = "io.mishmash.opentelemetry.persistence.proto.v1";
 option java_outer_classname = "ProfilesPersistenceProto";
 
 message PersistedProfile {

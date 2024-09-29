@@ -25,7 +25,8 @@ import java.util.logging.Logger;
 import io.mishmash.opentelemetry.server.collector.Instrumentation;
 import io.mishmash.opentelemetry.server.collector.Span;
 import io.mishmash.opentelemetry.server.collector.SpansSubscriber;
-import io.mishmash.opentelemetry.server.parquet.persistence.proto.v1.TracesPersistenceProto.PersistedSpan;
+import io.mishmash.opentelemetry.persistence.proto.ProtobufSpans;
+import io.mishmash.opentelemetry.persistence.proto.v1.TracesPersistenceProto.PersistedSpan;
 import io.opentelemetry.api.metrics.LongCounter;
 import io.opentelemetry.api.metrics.ObservableLongGauge;
 import io.opentelemetry.context.Scope;
@@ -191,74 +192,10 @@ public class FileSpans implements SpansSubscriber {
 
             try {
                 otelSpan.addEvent("Build persisted span");
-                PersistedSpan.Builder builder = PersistedSpan.newBuilder()
-                        .setBatchTimestamp(span.getBatchTimestamp())
-                        .setBatchUUID(span.getBatchUUID())
-                        .setSeqNo(span.getSeqNo())
-                        .setIsValid(span.isValid());
-
-                if (span.getErrorMessage() != null) {
-                    builder = builder.setErrorMessage(span.getErrorMessage());
-                }
-
-                if (span.getResource() != null) {
-                    builder = builder
-                            .addAllResourceAttributes(
-                                    span.getResource().getAttributesList())
-                            .setResourceDroppedAttributesCount(
-                                    span.getResource()
-                                        .getDroppedAttributesCount());
-                }
-
-                if (span.getResourceSchemaUrl() != null) {
-                    builder = builder
-                            .setResourceSchemaUrl(span.getResourceSchemaUrl());
-                }
-
-                if (span.getScope() != null) {
-                    builder = builder
-                            .setScopeName(span.getScope().getName())
-                            .setScopeVersion(span.getScope().getVersion())
-                            .addAllScopeAttributes(
-                                    span.getScope().getAttributesList())
-                            .setScopeDroppedAttributesCount(
-                                    span.getScope()
-                                        .getDroppedAttributesCount());
-                }
-
-                if (span.getSpan() != null) {
-                    builder = builder
-                            .setTraceId(span.getSpan().getTraceId())
-                            .setSpanId(span.getSpan().getSpanId())
-                            .setTraceState(span.getSpan().getTraceState())
-                            .setParentSpanId(span.getSpan().getParentSpanId())
-                            .setFlags(span.getSpan().getFlags())
-                            .setName(span.getSpan().getName())
-                            .setKind(span.getSpan().getKind())
-                            .setStartTimeUnixNano(
-                                    span.getSpan().getStartTimeUnixNano())
-                            .setEndTimeUnixNano(
-                                    span.getSpan().getEndTimeUnixNano())
-                            .addAllAttributes(
-                                    span.getSpan().getAttributesList())
-                            .setDroppedAttributesCount(
-                                    span.getSpan().getDroppedAttributesCount())
-                            .addAllEvents(span.getSpan().getEventsList())
-                            .setDroppedEventsCount(
-                                    span.getSpan().getDroppedEventsCount())
-                            .addAllLinks(span.getSpan().getLinksList())
-                            .setDroppedLinksCount(
-                                    span.getSpan().getDroppedLinksCount())
-                            .setStatus(span.getSpan().getStatus());
-                }
-
-                if (span.getSpanSchemaUrl() != null) {
-                    builder = builder
-                            .setSpanSchemaUrl(span.getSpanSchemaUrl());
-                }
-
                 otelSpan.addEvent("Write persisted span to file");
-                parquet.write(builder.build());
+                parquet.write(ProtobufSpans
+                        .buildSpan(span)
+                        .build());
 
                 numWritten.add(1);
 

@@ -32,18 +32,18 @@ import io.opentelemetry.context.Scope;
  *
  * Essentially it's used as a way of flow control - an OTLP client submits
  * a 'batch' of logs, metrics or traces and each individual item might be
- * processed by more than one {@link LogsSubscriber}, {@link MetricsSubscriber}
- * or {@link SpansSubscriber}.
+ * processed by more than one {@link LogsSubscriber}, {@link MetricsSubscriber},
+ * {@link SpansSubscriber} or {@link ProfilesSubscriber}.
  *
  * A response (success or failure) cannot be returned to the client before
  * the entire OTLP packet is processed by all subscribers, but each subscriber
  * might work on its own pace.
  *
- * So, a {@link LogsCollector}, a {@link MetricsCollector} or a
- * {@link TracesCollector} will create a batch of elements and subscribers,
- * load it with data from an OTLP packet and 'delay' the response to the
- * client until all the processing - of all elements by all subscribers -
- * is done.
+ * So, a {@link LogsCollector}, a {@link MetricsCollector}, a
+ * {@link TracesCollector} or a {@link ProfilesCollector} will create a batch
+ * of elements and subscribers, load it with data from an OTLP packet and
+ * 'delay' the response to the client until all the processing - of all
+ * elements by all subscribers - is done.
  *
  * @param <T> the type of elements (or work items) of this batch
  */

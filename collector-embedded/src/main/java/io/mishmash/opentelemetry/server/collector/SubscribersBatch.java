@@ -23,9 +23,10 @@ import io.opentelemetry.context.Context;
 import io.vertx.ext.auth.User;
 
 /**
- * A 'batch' of all {@link LogsSubscriber}s, {@link MetricsSubscriber}s
- * or @{link SpansSubscribers} that were given the task to process
- * an OpenTelemetry log record, metric data point or trace span.
+ * A 'batch' of all {@link LogsSubscriber}s, {@link MetricsSubscriber}s,
+ * {@link SpansSubscriber}s or {@link ProfilesSubscriber}s that were given
+ * the task to process an OpenTelemetry log record, metric data point or
+ * trace span.
  *
  * @param <T> the subscriber record type
  */

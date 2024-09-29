@@ -23,12 +23,13 @@
     <version>1.1.3</version>
   </parent>
 
-  <artifactId>server-parquet</artifactId>
+  <artifactId>persistence-protobuf</artifactId>
   <packaging>jar</packaging>
 
-  <name>Stand-alone OpenTelemetry data source for Apache Parquet files</name>
+  <name>Protobuf persistence format for extracted OpenTelemetry signals</name>
   <description>
-    A stand-alone OpenTelemetry server that collects logs, metrics, traces and profiles into Apache Parquet files.
+    Utility classes for protobuf serialization of OpenTelemetry signals as
+    extracted and 'flattened' by the embedded collectors.
   </description>
   <url>https://mishmash.io/open_source/opentelemetry</url>
 
@@ -72,11 +73,6 @@
     </developer>
   </developers>
 
-  <properties>
-    <parquet.version>1.14.2</parquet.version>
-    <hadoop.version>3.4.0</hadoop.version>
-  </properties>
-
   <build>
     <extensions>
       <extension>
@@ -88,6 +84,28 @@
 
     <plugins>
       <plugin>
+        <groupId>org.xolstice.maven.plugins</groupId>
+        <artifactId>protobuf-maven-plugin</artifactId>
+        <version>0.6.1</version>
+        <configuration>
+          <protocArtifact>
+            com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}
+          </protocArtifact>
+          <pluginId>grpc-java</pluginId>
+        </configuration>
+        <executions>
+          <execution>
+            <id>compile</id>
+            <configuration>
+            </configuration>
+            <goals>
+              <goal>compile</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
       </plugin>
@@ -98,6 +116,9 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <excludePackageNames>io.mishmash.opentelemetry.persistence.proto.v1</excludePackageNames>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -115,21 +136,6 @@
       <groupId>io.mishmash.opentelemetry</groupId>
       <artifactId>collector-embedded</artifactId>
       <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.mishmash.opentelemetry</groupId>
-      <artifactId>persistence-protobuf</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.parquet</groupId>
-      <artifactId>parquet-protobuf</artifactId>
-      <version>${parquet.version}</version>
-	</dependency>
-    <dependency>
-      <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-client</artifactId>
-      <version>${hadoop.version}</version>
     </dependency>
   </dependencies>
 
