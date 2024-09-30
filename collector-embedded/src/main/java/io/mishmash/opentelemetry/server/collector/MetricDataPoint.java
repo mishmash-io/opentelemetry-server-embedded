@@ -162,7 +162,7 @@ public class MetricDataPoint extends SubscribersBatch<MetricDataPoint> {
      *
      * @param batchTS the batch timestamp
      * @param batchID the batch id
-     * @param sequenceNum the sequence number of this span
+     * @param sequenceNum the sequence number of this metric
      * @param resourceMetric used to fill-in OpenTelemetry Resource details
      * @param scopeMetric used to fill-in OpenTelemetry Scope details
      * @param metric the metric details
@@ -208,7 +208,7 @@ public class MetricDataPoint extends SubscribersBatch<MetricDataPoint> {
      *
      * @param batchTS the batch timestamp
      * @param batchID the batch id
-     * @param sequenceNum the sequence number of this span
+     * @param sequenceNum the sequence number of this metric
      * @param resourceMetric used to fill-in OpenTelemetry Resource details
      * @param scopeMetric used to fill-in OpenTelemetry Scope details
      * @param metric the metric details
@@ -252,7 +252,7 @@ public class MetricDataPoint extends SubscribersBatch<MetricDataPoint> {
      *
      * @param batchTS the batch timestamp
      * @param batchID the batch id
-     * @param sequenceNum the sequence number of this span
+     * @param sequenceNum the sequence number of this metric
      * @param resourceMetric used to fill-in OpenTelemetry Resource details
      * @param scopeMetric used to fill-in OpenTelemetry Scope details
      * @param metric the metric details
@@ -298,7 +298,7 @@ public class MetricDataPoint extends SubscribersBatch<MetricDataPoint> {
      *
      * @param batchTS the batch timestamp
      * @param batchID the batch id
-     * @param sequenceNum the sequence number of this span
+     * @param sequenceNum the sequence number of this metric
      * @param resourceMetric used to fill-in OpenTelemetry Resource details
      * @param scopeMetric used to fill-in OpenTelemetry Scope details
      * @param metric the metric details
@@ -344,7 +344,7 @@ public class MetricDataPoint extends SubscribersBatch<MetricDataPoint> {
      *
      * @param batchTS the batch timestamp
      * @param batchID the batch id
-     * @param sequenceNum the sequence number of this span
+     * @param sequenceNum the sequence number of this metric
      * @param resourceMetric used to fill-in OpenTelemetry Resource details
      * @param scopeMetric used to fill-in OpenTelemetry Scope details
      * @param metric the metric details
