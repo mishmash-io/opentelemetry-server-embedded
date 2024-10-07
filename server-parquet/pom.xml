@@ -73,7 +73,7 @@
   </developers>
 
   <properties>
-    <parquet.version>1.14.2</parquet.version>
+    <parquet.version>1.14.3</parquet.version>
     <hadoop.version>3.4.0</hadoop.version>
   </properties>
 
