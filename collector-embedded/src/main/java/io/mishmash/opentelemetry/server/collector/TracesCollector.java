@@ -17,7 +17,6 @@
 
 package io.mishmash.opentelemetry.server.collector;
 
-import java.util.UUID;
 import java.util.concurrent.ForkJoinPool;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -28,8 +27,6 @@ import io.opentelemetry.context.Scope;
 import io.opentelemetry.proto.collector.trace.v1.ExportTracePartialSuccess;
 import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest;
 import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceResponse;
-import io.opentelemetry.proto.trace.v1.ResourceSpans;
-import io.opentelemetry.proto.trace.v1.ScopeSpans;
 import io.vertx.core.Vertx;
 
 /**
@@ -93,99 +90,78 @@ public class TracesCollector
 
             Batch<Span> batch = new Batch<>(otelContext);
 
-            long timestamp = System.currentTimeMillis();
-            String uuid = UUID.randomUUID().toString();
-
             int requestItems = 0;
 
-            for (ResourceSpans spans : request.getResourceSpansList()) {
-                for (ScopeSpans scope : spans.getScopeSpansList()) {
-                    for (io.opentelemetry.proto.trace.v1.Span span
-                            : scope.getSpansList()) {
-                        if (batch.isCancelled()) {
-                            return batch;
-                        }
+            for (Span s : new TracesFlattener(
+                                batch,
+                                Context.current(),
+                                request,
+                                Vertx.currentContext().get(VCTX_EMITTER))) {
+                if (batch.isCancelled()) {
+                    return batch;
+                }
 
-                        io.opentelemetry.api.trace.Span recordOtelSpan =
-                                getInstrumentation()
-                                    .startNewSpan("otel.record");
+                /*
+                 * FIXME: check if is valid and add an error message
+                 * (but still allow it to go to subscribers
+                 */
 
-                        Span s = new Span(batch,
-                                otelContext,
-                                Vertx.currentContext().get(VCTX_EMITTER));
-                        s.setFrom(
-                                timestamp,
-                                uuid,
-                                requestItems++,
-                                spans,
-                                scope,
-                                span);
+                s.addAll(getSubscribers());
+                s.setLoaded();
+                batch.add(s);
 
-                        /*
-                         * FIXME: check if is valid and add an error message
-                         * (but still allow it to go to subscribers
-                         */
+                requestItems++;
 
-                        s.addAll(getSubscribers());
-                        s.setLoaded();
-                        batch.add(s);
-
-                        recordOtelSpan.addEvent("Request item loaded");
-
-                        int estimatedLag = offer(
-                                s,
-                                (subscriber, droppedItem) -> {
-                                    /*
-                                     * set an error on this in the response,
-                                     * FIXME: use another exception class
-                                     */
-                                    droppedItem.completeExceptionally(
-                                            new RuntimeException(
-                                                "Traces collector subscriber "
-                                                    + subscriber
-                                                    + " dropped a span record")
-                                            );
-
-                                    // do not retry
-                                    return false;
-                                });
-
-                        if (estimatedLag < 0) {
-                            // says how many subscribers dropped the message
-                            LOG.info(
-                                    String.format(
-                                            "Traces batch %s has %d drop(s)",
-                                            uuid,
-                                            (-estimatedLag)));
-
-                            addDroppedRequestItems(
-                                    (-estimatedLag),
-                                    transport,
-                                    encoding);
-                        } else if (estimatedLag == 0) {
-                            // there were no subscribers, set an error
-                            batch.setLoadFailed(
-                                    new IllegalStateException("""
-                                            Traces collector currently has \
-                                            no subscribers"""));
-
-                            LOG.log(Level.SEVERE,
-                                    """
-                                        Traces batch load failed, traces \
-                                        collector currently has no \
-                                        subscribers. Batch id: """
-                                            + uuid);
-
-                            return batch;
-                        // } else {
+                int estimatedLag = offer(
+                        s,
+                        (subscriber, droppedItem) -> {
                             /*
-                             * positive number is the estimated lag - number
-                             * of items submitted but not yet consumed
+                             * set an error on this in the response,
+                             * FIXME: use another exception class
                              */
+                            droppedItem.completeExceptionally(
+                                    new RuntimeException(
+                                        "Traces collector subscriber "
+                                            + subscriber
+                                            + " dropped a span record")
+                                    );
 
-                         // LOG.info("Traces estimated lag: " + estimatedLag);
-                        }
-                    }
+                            // do not retry
+                            return false;
+                        });
+
+                if (estimatedLag < 0) {
+                    // says how many subscribers dropped the message
+                    LOG.info(
+                            String.format(
+                                    "Traces batch has %d drop(s)",
+                                    (-estimatedLag)));
+
+                    addDroppedRequestItems(
+                            (-estimatedLag),
+                            transport,
+                            encoding);
+                } else if (estimatedLag == 0) {
+                    // there were no subscribers, set an error
+                    batch.setLoadFailed(
+                            new IllegalStateException("""
+                                    Traces collector currently has \
+                                    no subscribers"""));
+
+                    LOG.log(Level.SEVERE,
+                            """
+                                Traces batch load failed, traces \
+                                collector currently has no \
+                                subscribers. Batch id: """);
+
+                    return batch;
+                // } else {
+                    /*
+                     * positive number is the estimated lag - number
+                     * of items submitted but not yet consumed
+                     */
+
+                 // LOG.info("Traces estimated lag: " + estimatedLag);
                 }
             }
 

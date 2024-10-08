@@ -17,6 +17,8 @@
 
 package io.mishmash.opentelemetry.persistence.proto;
 
+import java.util.Map;
+
 import io.mishmash.opentelemetry.persistence.proto.v1.LogsPersistenceProto.PersistedLog;
 import io.mishmash.opentelemetry.server.collector.Log;
 import io.opentelemetry.proto.common.v1.AnyValue;
@@ -124,5 +126,16 @@ public final class ProtobufLogs {
         }
 
         return builder;
+    }
+
+    /**
+     * Convert a {@link PersistedLog} to a {@link Map} suitable for JSON
+     * encoding.
+     *
+     * @param log the persisted log protobuf message
+     * @return the {@link Map}
+     */
+    public static Map<String, Object> toJsonMap(final PersistedLog log) {
+        return ProtobufUtils.toJsonMap(log.getAllFields());
     }
 }

@@ -18,7 +18,6 @@
 package io.mishmash.opentelemetry.server.collector;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Flow.Subscriber;
 import java.util.logging.Level;
@@ -31,17 +30,6 @@ import io.opentelemetry.context.Scope;
 import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsPartialSuccess;
 import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceRequest;
 import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceResponse;
-import io.opentelemetry.proto.metrics.v1.ExponentialHistogram;
-import io.opentelemetry.proto.metrics.v1.ExponentialHistogramDataPoint;
-import io.opentelemetry.proto.metrics.v1.Gauge;
-import io.opentelemetry.proto.metrics.v1.Histogram;
-import io.opentelemetry.proto.metrics.v1.HistogramDataPoint;
-import io.opentelemetry.proto.metrics.v1.NumberDataPoint;
-import io.opentelemetry.proto.metrics.v1.ResourceMetrics;
-import io.opentelemetry.proto.metrics.v1.ScopeMetrics;
-import io.opentelemetry.proto.metrics.v1.Sum;
-import io.opentelemetry.proto.metrics.v1.Summary;
-import io.opentelemetry.proto.metrics.v1.SummaryDataPoint;
 import io.vertx.core.Vertx;
 
 /**
@@ -105,217 +93,27 @@ public class MetricsCollector
 
             Batch<MetricDataPoint> batch = new Batch<>(otelContext);
 
-            long timestamp = System.currentTimeMillis();
-            String uuid = UUID.randomUUID().toString();
-
-            int seqNo = 0;
             int requestItems = 0;
 
-            for (ResourceMetrics metrics : request.getResourceMetricsList()) {
-                for (ScopeMetrics scopeMetrics
-                        : metrics.getScopeMetricsList()) {
-                    for (io.opentelemetry.proto.metrics.v1.Metric metric
-                            : scopeMetrics.getMetricsList()) {
-                        int dpSeqNo = 0;
-
-                        Span recordSpan = getInstrumentation()
-                                .startNewSpan("otel.record");
-
-                        switch (metric.getDataCase()) {
-                        case DATA_NOT_SET:
-                            /*
-                             * FIXME: what to do when a metric has no
-                             * data points?
-                             */
-                            continue;
-
-                        case EXPONENTIAL_HISTOGRAM:
-                            ExponentialHistogram exponentialHistogram =
-                                metric.getExponentialHistogram();
-
-                            for (ExponentialHistogramDataPoint dp
-                                    : exponentialHistogram
-                                        .getDataPointsList()) {
-                                if (batch.isCancelled()) {
-                                    return batch;
-                                }
-
-                                MetricDataPoint m = new MetricDataPoint(
-                                        batch,
-                                        Context.current(),
-                                        Vertx.currentContext()
-                                            .get(VCTX_EMITTER));
-                                m.setFrom(timestamp,
-                                        uuid,
-                                        seqNo,
-                                        metrics,
-                                        scopeMetrics,
-                                        metric,
-                                        exponentialHistogram,
-                                        dpSeqNo++,
-                                        dp);
-
-                                if (!offerDataPoint(
-                                        batch,
-                                        m,
-                                        uuid,
-                                        transport,
-                                        encoding)) {
-                                    return batch;
-                                }
-                            }
-
-                            break;
-                        case GAUGE:
-                            Gauge gauge = metric.getGauge();
-
-                            for (NumberDataPoint dp
-                                    : gauge.getDataPointsList()) {
-                                if (batch.isCancelled()) {
-                                    return batch;
-                                }
-
-                                MetricDataPoint m = new MetricDataPoint(
-                                        batch,
-                                        Context.current(),
-                                        Vertx.currentContext()
-                                            .get(VCTX_EMITTER));
-                                m.setFrom(timestamp,
-                                        uuid,
-                                        seqNo,
-                                        metrics,
-                                        scopeMetrics,
-                                        metric,
-                                        gauge,
-                                        dpSeqNo++,
-                                        dp);
-
-                                if (!offerDataPoint(
-                                        batch,
-                                        m,
-                                        uuid,
-                                        transport,
-                                        encoding)) {
-                                    return batch;
-                                }
-                            }
-
-                            break;
-                        case HISTOGRAM:
-                            Histogram histogram = metric.getHistogram();
-
-                            for (HistogramDataPoint dp
-                                    : histogram.getDataPointsList()) {
-                                if (batch.isCancelled()) {
-                                    return batch;
-                                }
-
-                                MetricDataPoint m = new MetricDataPoint(
-                                        batch,
-                                        Context.current(),
-                                        Vertx.currentContext()
-                                            .get(VCTX_EMITTER));
-                                m.setFrom(timestamp,
-                                        uuid,
-                                        seqNo,
-                                        metrics,
-                                        scopeMetrics,
-                                        metric,
-                                        histogram,
-                                        dpSeqNo++,
-                                        dp);
-
-                                if (!offerDataPoint(
-                                        batch,
-                                        m,
-                                        uuid,
-                                        transport,
-                                        encoding)) {
-                                    return batch;
-                                }
-                            }
-
-                            break;
-                        case SUM:
-                            Sum sum = metric.getSum();
-
-                            for (NumberDataPoint dp
-                                    : sum.getDataPointsList()) {
-                                if (batch.isCancelled()) {
-                                    return batch;
-                                }
-
-                                MetricDataPoint m = new MetricDataPoint(
-                                        batch,
-                                        Context.current(),
-                                        Vertx.currentContext()
-                                            .get(VCTX_EMITTER));
-                                m.setFrom(timestamp,
-                                        uuid,
-                                        seqNo,
-                                        metrics,
-                                        scopeMetrics,
-                                        metric,
-                                        sum,
-                                        dpSeqNo++,
-                                        dp);
-
-                                if (!offerDataPoint(batch,
-                                        m,
-                                        uuid,
-                                        transport,
-                                        encoding)) {
-                                    return batch;
-                                }
-                            }
-
-                            break;
-                        case SUMMARY:
-                            Summary summary = metric.getSummary();
-
-                            for (SummaryDataPoint dp
-                                    : summary.getDataPointsList()) {
-                                if (batch.isCancelled()) {
-                                    return batch;
-                                }
-
-                                MetricDataPoint m = new MetricDataPoint(
-                                        batch,
-                                        Context.current(),
-                                        Vertx.currentContext()
-                                            .get(VCTX_EMITTER));
-                                m.setFrom(timestamp,
-                                        uuid,
-                                        seqNo,
-                                        metrics,
-                                        scopeMetrics,
-                                        metric,
-                                        summary,
-                                        dpSeqNo++,
-                                        dp);
-
-                                if (!offerDataPoint(
-                                        batch,
-                                        m,
-                                        uuid,
-                                        transport,
-                                        encoding)) {
-                                    return batch;
-                                }
-                            }
-
-                            break;
-                        default:
-                            // FIXME: unknown type!
-                            break;
-                        }
-
-                        requestItems += dpSeqNo;
-                        seqNo++;
-
-                        recordSpan.addEvent("Request item loaded");
-                    }
+            for (MetricDataPoint m : new MetricsFlattener(
+                                            batch,
+                                            Context.current(),
+                                            request,
+                                            Vertx.currentContext()
+                                                .get(VCTX_EMITTER))) {
+                if (batch.isCancelled()) {
+                    return batch;
                 }
+
+                if (!offerDataPoint(
+                        batch,
+                        m,
+                        transport,
+                        encoding)) {
+                    return batch;
+                }
+
+                requestItems++;
             }
 
             batch.setLoaded();
@@ -331,7 +129,6 @@ public class MetricsCollector
      *
      * @param batch the batch
      * @param m the data point
-     * @param uuid id of the batch
      * @param transport OTLP transport used
      * @param encoding OTLP transport encoding used
      * @return true if successful
@@ -339,7 +136,6 @@ public class MetricsCollector
     protected boolean offerDataPoint(
             final Batch<MetricDataPoint> batch,
             final MetricDataPoint m,
-            final String uuid,
             final String transport,
             final String encoding) {
         /*
@@ -371,8 +167,7 @@ public class MetricsCollector
             // it tells how many subscribers dropped the message
             LOG.info(
                     String.format(
-                            "Metrics batch %s has %d drop(s)",
-                            uuid,
+                            "Metrics batch has %d drop(s)",
                             (-estimatedLag)));
             addDroppedRequestItems((-estimatedLag), transport, encoding);
         } else if (estimatedLag == 0) {
@@ -382,8 +177,7 @@ public class MetricsCollector
                             "Metrics collector currently has no subscribers"));
             LOG.log(Level.SEVERE, """
                     Metrics batch load failed, metrics collector currently \
-                    has no subscribers. Batch id: """
-                            + uuid);
+                    has no subscribers. Batch id: """);
 
             return false;
         // } else {

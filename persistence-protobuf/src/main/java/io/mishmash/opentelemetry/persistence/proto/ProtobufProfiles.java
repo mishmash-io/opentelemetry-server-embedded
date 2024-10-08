@@ -20,6 +20,7 @@ package io.mishmash.opentelemetry.persistence.proto;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import io.mishmash.opentelemetry.persistence.proto.v1.ProfilesPersistenceProto.KeyValueUnit;
 import io.mishmash.opentelemetry.persistence.proto.v1.ProfilesPersistenceProto.PersistedProfile;
@@ -440,5 +441,17 @@ public final class ProtobufProfiles {
         return indexes.stream()
                 .map(l -> getStrAt(p, l))
                 .toList();
+    }
+
+    /**
+     * Convert a {@link PersistedProfile} to a {@link Map} suitable for JSON
+     * encoding.
+     *
+     * @param profile the persisted profile protobuf message
+     * @return the {@link Map}
+     */
+    public static Map<String, Object> toJsonMap(
+            final PersistedProfile profile) {
+        return ProtobufUtils.toJsonMap(profile.getAllFields());
     }
 }

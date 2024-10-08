@@ -17,7 +17,6 @@
 
 package io.mishmash.opentelemetry.server.collector;
 
-import java.util.UUID;
 import java.util.concurrent.ForkJoinPool;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,9 +28,6 @@ import io.opentelemetry.context.Scope;
 import io.opentelemetry.proto.collector.logs.v1.ExportLogsPartialSuccess;
 import io.opentelemetry.proto.collector.logs.v1.ExportLogsServiceRequest;
 import io.opentelemetry.proto.collector.logs.v1.ExportLogsServiceResponse;
-import io.opentelemetry.proto.logs.v1.LogRecord;
-import io.opentelemetry.proto.logs.v1.ResourceLogs;
-import io.opentelemetry.proto.logs.v1.ScopeLogs;
 import io.vertx.core.Vertx;
 
 /**
@@ -94,94 +90,73 @@ public class LogsCollector
 
             Batch<Log> batch = new Batch<>(otelContext);
 
-            long timestamp = System.currentTimeMillis();
-            String uuid = UUID.randomUUID().toString();
-
             int requestItems = 0;
 
-            for (ResourceLogs logs : request.getResourceLogsList()) {
-                for (ScopeLogs scopeLogs : logs.getScopeLogsList()) {
-                    for (LogRecord log : scopeLogs.getLogRecordsList()) {
-                        if (batch.isCancelled()) {
-                            return batch;
-                        }
-
-                        Span recordSpan = getInstrumentation()
-                                .startNewSpan("otel.record");
-
-                        Log l = new Log(batch,
+            for (Log l : new LogsFlattener(
+                                batch,
                                 Context.current(),
-                                Vertx.currentContext().get(VCTX_EMITTER));
-                        l.setFrom(
-                                timestamp,
-                                uuid,
-                                requestItems++,
-                                logs,
-                                scopeLogs,
-                                log);
+                                request,
+                                Vertx.currentContext().get(VCTX_EMITTER))) {
+                if (batch.isCancelled()) {
+                    return batch;
+                }
 
-                        /*
-                         * FIXME: check if is valid and add an error message
-                         * (but still allow it to go to subscribers)
-                         */
+                /*
+                 * FIXME: check if is valid and add an error message
+                 * (but still allow it to go to subscribers)
+                 */
 
-                        l.addAll(getSubscribers());
-                        l.setLoaded();
-                        batch.add(l);
+                requestItems++;
+                l.addAll(getSubscribers());
+                l.setLoaded();
+                batch.add(l);
 
-                        recordSpan.addEvent("Request item loaded");
-
-                        int estimatedLag = offer(
-                                l,
-                                (subscriber, droppedItem) -> {
-                                    /*
-                                     * set an error on this in the response,
-                                     * FIXME: use another exception class
-                                     */
-                                    droppedItem.completeExceptionally(
-                                            new RuntimeException(
-                                                "Logs collector subscriber "
-                                                + subscriber
-                                                + " dropped a log record"));
-
-                                    // droppedItem.complete(subscriber);
-                                    // do not retry
-                                    return false;
-                                });
-
-                        if (estimatedLag < 0) {
-                            // says how many subscribers dropped the message
-                            LOG.info(
-                                    String.format(
-                                            "Logs batch %s has %d drop(s)",
-                                            uuid,
-                                            (-estimatedLag)));
-                            addDroppedRequestItems(
-                                    (-estimatedLag),
-                                    transport,
-                                    encoding);
-                        } else if (estimatedLag == 0) {
-                            // there were no subscribers, set an error
-                            batch.setLoadFailed(
-                                    new IllegalStateException("""
-                                            Logs collector currently has \
-                                            no subscribers"""));
-                            LOG.log(Level.SEVERE, """
-                                    Logs batch load failed, logs collector \
-                                    currently has no subscribers. \
-                                    Batch id: """
-                                        + uuid);
-
-                            return batch;
-                        // } else {
+                int estimatedLag = offer(
+                        l,
+                        (subscriber, droppedItem) -> {
                             /*
-                             * positive number is the estimated lag - number
-                             * of items submitted but not yet consumed
+                             * set an error on this in the response,
+                             * FIXME: use another exception class
                              */
+                            droppedItem.completeExceptionally(
+                                    new RuntimeException(
+                                        "Logs collector subscriber "
+                                        + subscriber
+                                        + " dropped a log record"));
 
-                            // LOG.info("Logs estimated lag: " + estimatedLag);
-                        }
-                    }
+                            // droppedItem.complete(subscriber);
+                            // do not retry
+                            return false;
+                        });
+
+                if (estimatedLag < 0) {
+                    // says how many subscribers dropped the message
+                    LOG.info(
+                            String.format(
+                                    "Logs batch has %d drop(s)",
+                                    (-estimatedLag)));
+                    addDroppedRequestItems(
+                            (-estimatedLag),
+                            transport,
+                            encoding);
+                } else if (estimatedLag == 0) {
+                    // there were no subscribers, set an error
+                    batch.setLoadFailed(
+                            new IllegalStateException("""
+                                    Logs collector currently has \
+                                    no subscribers"""));
+                    LOG.log(Level.SEVERE, """
+                            Logs batch load failed, logs collector \
+                            currently has no subscribers. """);
+
+                    return batch;
+                // } else {
+                    /*
+                     * positive number is the estimated lag - number
+                     * of items submitted but not yet consumed
+                     */
+
+                    // LOG.info("Logs estimated lag: " + estimatedLag);
                 }
             }
 
