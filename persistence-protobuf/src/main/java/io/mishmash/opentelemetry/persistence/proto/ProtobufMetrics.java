@@ -17,6 +17,8 @@
 
 package io.mishmash.opentelemetry.persistence.proto;
 
+import java.util.Map;
+
 import io.mishmash.opentelemetry.persistence.proto.v1.MetricsPersistenceProto.PersistedMetric;
 import io.mishmash.opentelemetry.server.collector.MetricDataPoint;
 import io.opentelemetry.proto.metrics.v1.ExponentialHistogramDataPoint;
@@ -205,5 +207,17 @@ public final class ProtobufMetrics {
         }
 
         return builder;
+    }
+
+    /**
+     * Convert a {@link PersistedMetric} to a {@link Map} suitable for JSON
+     * encoding.
+     *
+     * @param metric the persisted metric protobuf message
+     * @return the {@link Map}
+     */
+    public static Map<String, Object> toJsonMap(
+            final PersistedMetric metric) {
+        return ProtobufUtils.toJsonMap(metric.getAllFields());
     }
 }

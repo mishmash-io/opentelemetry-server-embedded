@@ -109,6 +109,60 @@ public class MetricsFlattener implements Iterable<MetricDataPoint> {
     }
 
     /**
+     * Get the configured Metrics {@link Batch}, if any.
+     *
+     * @return the batch or null if not set
+     */
+    public Batch<MetricDataPoint> getBatch() {
+        return batch;
+    }
+
+    /**
+     * Get the own telemetry context, if any.
+     *
+     * @return the {@link Context} or null if not set
+     */
+    public Context getOtel() {
+        return otel;
+    }
+
+    /**
+     * Get the parsed protobuf Metrics request.
+     *
+     * @return the {@link ExportMetricsServiceRequest} message
+     */
+    public ExportMetricsServiceRequest getRequest() {
+        return request;
+    }
+
+    /**
+     * Get the authenticated user who submitted this message.
+     *
+     * @return the {@link User} or null if authentication was not enabled
+     */
+    public User getUser() {
+        return user;
+    }
+
+    /**
+     * Get the timestamp used by this flattener.
+     *
+     * @return the timestamp in milliseconds
+     */
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    /**
+     * Get the unique UUID used by this flattener.
+     *
+     * @return the UUID
+     */
+    public String getUuid() {
+        return uuid;
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override

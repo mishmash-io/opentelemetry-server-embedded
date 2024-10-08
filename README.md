@@ -35,6 +35,24 @@ Parquet files as saved by this Stand-alone server.
 - [README](./server-parquet)
 - [Javadoc on javadoc.io](https://javadoc.io/doc/io.mishmash.opentelemetry/server-parquet)
 
+## Apache Druid Input Format
+
+Use this artifact when ingesting OpenTelemetry signals into [Apache Druid](https://druid.apache.org), in combination with an Input Source (like Apache Kafka or other).
+
+Apache Druid is a high performance, real-time analytics database that delivers sub-second queries on streaming and batch data at scale and under load. This makes it perfect for OpenTelemetry data analytics.
+
+With this OTLP Input Format you can build OpenTelemetry ingestion pipelines into Apache
+Druid. For example:
+- Use the [OpenTelemetry Kafka Exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/exporter/kafkaexporter/README.md) to publish
+OTLP signals to an Apache Kafka topic, then the [Druid Kafka Ingestion](https://druid.apache.org/docs/latest/ingestion/kafka-ingestion/) with this Input Format to get Druid
+tables with your telemetry.
+- In a similar way you can also use other Druid input sources developed by mishmash io -
+like with [Apache BookKeeper](https://bookkeeper.apache.org) or [Apache Pulsar](https://pulsar.apache.org). For details - check the related artifact documentation.
+
+Find out more about the OTLP Input Format for Apache Druid:
+- [README](./druid-input-format)
+- [Javadoc on javadoc.io](https://javadoc.io/doc/io.mishmash.opentelemetry/druid-input-format)
+
 # OpenTelemetry at mishmash io
 
 OpenTelemetry's main intent is the observability of production environments, but at [mishmash io](https://mishmash.io) it is part of our software development process. By saving telemetry from  **experiments** and **tests** of 
@@ -44,4 +62,3 @@ We believe that adopting OpenTelemetry as a software development tool might be u
 
 Learn more about the broader set of [OpenTelemetry-related activities](https://mishmash.io/open_source/opentelemetry) at
 [mishmash io](https://mishmash.io/) and `follow` [GitHub profile](https://github.com/mishmash-io) for updates and new releases.
-

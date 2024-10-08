@@ -17,6 +17,8 @@
 
 package io.mishmash.opentelemetry.persistence.proto;
 
+import java.util.Map;
+
 import io.mishmash.opentelemetry.persistence.proto.v1.TracesPersistenceProto.PersistedSpan;
 import io.mishmash.opentelemetry.server.collector.Span;
 
@@ -104,5 +106,17 @@ public final class ProtobufSpans {
         }
 
         return builder;
+    }
+
+    /**
+     * Convert a {@link PersistedSpan} to a {@link Map} suitable for JSON
+     * encoding.
+     *
+     * @param span the persisted span protobuf message
+     * @return the {@link Map}
+     */
+    public static Map<String, Object> toJsonMap(
+            final PersistedSpan span) {
+        return ProtobufUtils.toJsonMap(span.getAllFields());
     }
 }
