@@ -80,7 +80,7 @@
     <module>collector-embedded</module>
     <module>persistence-protobuf</module>
     <module>server-parquet</module>
-    <module>druid-input-format</module>
+    <module>druid-otlp-format</module>
   </modules>
 
   <dependencyManagement>

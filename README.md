@@ -35,7 +35,7 @@ Parquet files as saved by this Stand-alone server.
 - [README](./server-parquet)
 - [Javadoc on javadoc.io](https://javadoc.io/doc/io.mishmash.opentelemetry/server-parquet)
 
-## Apache Druid Input Format
+## Apache Druid OTLP Input Format
 
 Use this artifact when ingesting OpenTelemetry signals into [Apache Druid](https://druid.apache.org), in combination with an Input Source (like Apache Kafka or other).
 
@@ -50,8 +50,8 @@ tables with your telemetry.
 like with [Apache BookKeeper](https://bookkeeper.apache.org) or [Apache Pulsar](https://pulsar.apache.org). For details - check the related artifact documentation.
 
 Find out more about the OTLP Input Format for Apache Druid:
-- [README](./druid-input-format)
-- [Javadoc on javadoc.io](https://javadoc.io/doc/io.mishmash.opentelemetry/druid-input-format)
+- [README](./druid-otlp-format)
+- [Javadoc on javadoc.io](https://javadoc.io/doc/io.mishmash.opentelemetry/druid-otlp-format)
 
 # OpenTelemetry at mishmash io
 
