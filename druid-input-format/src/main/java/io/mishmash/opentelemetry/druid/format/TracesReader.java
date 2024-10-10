@@ -25,12 +25,14 @@ import java.util.Map;
 
 import org.apache.druid.data.input.InputEntity;
 import org.apache.druid.data.input.InputRow;
+import org.apache.druid.data.input.InputRowSchema;
 import org.apache.druid.data.input.IntermediateRowParsingReader;
+import org.apache.druid.data.input.impl.MapInputRowParser;
 import org.apache.druid.java.util.common.parsers.CloseableIteratorWithMetadata;
 import org.apache.druid.java.util.common.parsers.ParseException;
 
-import io.mishmash.opentelemetry.persistence.proto.ProtobufSpans;
 import io.mishmash.opentelemetry.persistence.proto.v1.TracesPersistenceProto.PersistedSpan;
+import io.mishmash.opentelemetry.persistence.protobuf.ProtobufSpans;
 import io.mishmash.opentelemetry.server.collector.Span;
 import io.mishmash.opentelemetry.server.collector.TracesFlattener;
 import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest;
@@ -53,17 +55,24 @@ public class TracesReader extends IntermediateRowParsingReader<PersistedSpan> {
      * True if the 'raw' format was configured.
      */
     private boolean isRaw = false;
+    /**
+     * The ingestion schema config.
+     */
+    private InputRowSchema schema;
 
     /**
-     * Create an OTLP logs reader.
+     * Create an OTLP traces reader.
      *
+     * @param rowSchema the schema as set in ingestion config
      * @param input the {@link InputEntity} containing protobuf-encoded bytes
      * @param isRawFormat true if input contains a 'raw'
      * {@link ExportTraceServiceRequest}
      */
     public TracesReader(
+            final InputRowSchema rowSchema,
             final InputEntity input,
             final boolean isRawFormat) {
+        this.schema = rowSchema;
         this.source = input;
         this.isRaw = isRawFormat;
     }
@@ -75,8 +84,10 @@ public class TracesReader extends IntermediateRowParsingReader<PersistedSpan> {
     protected List<InputRow> parseInputRows(
             final PersistedSpan intermediateRow)
                     throws IOException, ParseException {
-        // TODO Auto-generated method stub
-        return null;
+        return Collections.singletonList(
+                MapInputRowParser.parse(
+                        schema,
+                        ProtobufSpans.toJsonMap(intermediateRow)));
     }
 
     /**

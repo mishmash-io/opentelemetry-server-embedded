@@ -79,9 +79,11 @@ message PersistedLog {
   // https://opentelemetry.io/docs/specs/otel/schemas/#schema-url
   string log_schema_url = 28;
 
+  reserved 29, 30;
+
   // is_valid will be false if the system found this record to not comply with OTLP specs.
-  bool is_valid = 29;
+  bool is_valid = 100;
 
   // when is_valid is false, error_message will provide some information on what was wrong.
-  string error_message = 30;
+  optional string error_message = 101;
 }

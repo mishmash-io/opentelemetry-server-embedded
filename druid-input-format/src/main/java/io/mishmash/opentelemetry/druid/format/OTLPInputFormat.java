@@ -123,29 +123,23 @@ public class OTLPInputFormat implements InputFormat {
             final InputRowSchema inputRowSchema,
             final InputEntity source,
             final File temporaryDirectory) {
-        // use to filter out columns:
-        inputRowSchema.getColumnsFilter();
-        inputRowSchema.getDimensionsSpec();
-        inputRowSchema.getTimestampSpec();
-        inputRowSchema.getMetricNames();
-
         switch (getOtlpInputSignal()) {
         case LOGS_FLAT:
-            return new LogsReader(source, false);
+            return new LogsReader(inputRowSchema, source, false);
         case LOGS_RAW:
-            return new LogsReader(source, true);
+            return new LogsReader(inputRowSchema, source, true);
         case METRICS_FLAT:
-            return new MetricsReader(source, false);
+            return new MetricsReader(inputRowSchema, source, false);
         case METRICS_RAW:
-            return new MetricsReader(source, true);
+            return new MetricsReader(inputRowSchema, source, true);
         case TRACES_FLAT:
-            return new TracesReader(source, false);
+            return new TracesReader(inputRowSchema, source, false);
         case TRACES_RAW:
-            return new TracesReader(source, true);
+            return new TracesReader(inputRowSchema, source, true);
         case PROFILES_FLAT:
-            return new ProfilesReader(source, false);
+            return new ProfilesReader(inputRowSchema, source, false);
         case PROFILES_RAW:
-            return new ProfilesReader(source, true);
+            return new ProfilesReader(inputRowSchema, source, true);
         default:
             // should not happen
             throw new UnsupportedOperationException("Internal error");

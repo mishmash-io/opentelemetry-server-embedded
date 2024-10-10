@@ -29,8 +29,8 @@ import io.opentelemetry.api.metrics.LongCounter;
 import io.opentelemetry.api.metrics.ObservableLongGauge;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.context.Scope;
-import io.mishmash.opentelemetry.persistence.proto.ProtobufProfiles;
 import io.mishmash.opentelemetry.persistence.proto.v1.ProfilesPersistenceProto.PersistedProfile;
+import io.mishmash.opentelemetry.persistence.protobuf.ProtobufProfiles;
 
 /**
  * Subscribes to incoming OpenTelemetry profiles and writes them to parquet

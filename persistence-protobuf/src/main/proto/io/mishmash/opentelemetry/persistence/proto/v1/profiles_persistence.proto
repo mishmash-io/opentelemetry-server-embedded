@@ -103,11 +103,13 @@ message PersistedProfile {
   // the value type
   StrValueType type = 39;
 
+  reserved 40, 41;
+
   // is_valid will be false if the system found this record to not comply with OTLP specs.
-  bool is_valid = 40;
+  bool is_valid = 100;
 
   // when is_valid is false, error_message will provide some information on what was wrong.
-  string error_message = 41;
+  optional string error_message = 101;
 }
 
 // An opentelemetry.proto.profiles.v1experimental.ValueType with extracted strings

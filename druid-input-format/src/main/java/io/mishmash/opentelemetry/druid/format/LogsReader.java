@@ -25,12 +25,14 @@ import java.util.Map;
 
 import org.apache.druid.data.input.InputEntity;
 import org.apache.druid.data.input.InputRow;
+import org.apache.druid.data.input.InputRowSchema;
 import org.apache.druid.data.input.IntermediateRowParsingReader;
+import org.apache.druid.data.input.impl.MapInputRowParser;
 import org.apache.druid.java.util.common.parsers.CloseableIteratorWithMetadata;
 import org.apache.druid.java.util.common.parsers.ParseException;
 
-import io.mishmash.opentelemetry.persistence.proto.ProtobufLogs;
 import io.mishmash.opentelemetry.persistence.proto.v1.LogsPersistenceProto.PersistedLog;
+import io.mishmash.opentelemetry.persistence.protobuf.ProtobufLogs;
 import io.mishmash.opentelemetry.server.collector.Log;
 import io.mishmash.opentelemetry.server.collector.LogsFlattener;
 import io.opentelemetry.proto.collector.logs.v1.ExportLogsServiceRequest;
@@ -53,17 +55,24 @@ public class LogsReader extends IntermediateRowParsingReader<PersistedLog> {
      * True if the 'raw' format was configured.
      */
     private boolean isRaw = false;
+    /**
+     * The ingestion schema config.
+     */
+    private InputRowSchema schema;
 
     /**
      * Create an OTLP logs reader.
      *
+     * @param rowSchema the schema as set in ingestion config
      * @param input the {@link InputEntity} containing protobuf-encoded bytes
      * @param isRawFormat true if input contains a 'raw'
      * {@link ExportLogsServiceRequest}
      */
     public LogsReader(
+            final InputRowSchema rowSchema,
             final InputEntity input,
             final boolean isRawFormat) {
+        this.schema = rowSchema;
         this.source = input;
         this.isRaw = isRawFormat;
     }
@@ -75,8 +84,10 @@ public class LogsReader extends IntermediateRowParsingReader<PersistedLog> {
     protected List<InputRow> parseInputRows(
             final PersistedLog intermediateRow)
                     throws IOException, ParseException {
-        // TODO Auto-generated method stub
-        return null;
+        return Collections.singletonList(
+                MapInputRowParser.parse(
+                        schema,
+                        ProtobufLogs.toJsonMap(intermediateRow)));
     }
 
     /**

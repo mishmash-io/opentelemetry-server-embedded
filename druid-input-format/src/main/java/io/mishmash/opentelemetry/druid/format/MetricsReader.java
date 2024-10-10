@@ -25,12 +25,14 @@ import java.util.Map;
 
 import org.apache.druid.data.input.InputEntity;
 import org.apache.druid.data.input.InputRow;
+import org.apache.druid.data.input.InputRowSchema;
 import org.apache.druid.data.input.IntermediateRowParsingReader;
+import org.apache.druid.data.input.impl.MapInputRowParser;
 import org.apache.druid.java.util.common.parsers.CloseableIteratorWithMetadata;
 import org.apache.druid.java.util.common.parsers.ParseException;
 
-import io.mishmash.opentelemetry.persistence.proto.ProtobufMetrics;
 import io.mishmash.opentelemetry.persistence.proto.v1.MetricsPersistenceProto.PersistedMetric;
+import io.mishmash.opentelemetry.persistence.protobuf.ProtobufMetrics;
 import io.mishmash.opentelemetry.server.collector.MetricDataPoint;
 import io.mishmash.opentelemetry.server.collector.MetricsFlattener;
 import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceRequest;
@@ -54,17 +56,24 @@ public class MetricsReader
      * True if the 'raw' format was configured.
      */
     private boolean isRaw = false;
+    /**
+     * The ingestion schema config.
+     */
+    private InputRowSchema schema;
 
     /**
      * Create an OTLP metrics reader.
      *
+     * @param rowSchema the schema as set in ingestion config
      * @param input the {@link InputEntity} containing protobuf-encoded bytes
      * @param isRawFormat true if input contains a 'raw'
      * {@link ExportMetricsServiceRequest}
      */
     public MetricsReader(
+            final InputRowSchema rowSchema,
             final InputEntity input,
             final boolean isRawFormat) {
+        this.schema = rowSchema;
         this.source = input;
         this.isRaw = isRawFormat;
     }
@@ -76,8 +85,10 @@ public class MetricsReader
     protected List<InputRow> parseInputRows(
             final PersistedMetric intermediateRow)
                     throws IOException, ParseException {
-        // TODO Auto-generated method stub
-        return null;
+        return Collections.singletonList(
+                MapInputRowParser.parse(
+                        schema,
+                        ProtobufMetrics.toJsonMap(intermediateRow)));
     }
 
     /**
