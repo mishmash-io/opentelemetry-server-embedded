@@ -15,7 +15,7 @@
  *
  */
 
-package io.mishmash.opentelemetry.persistence.proto;
+package io.mishmash.opentelemetry.persistence.protobuf;
 
 import java.util.Map;
 

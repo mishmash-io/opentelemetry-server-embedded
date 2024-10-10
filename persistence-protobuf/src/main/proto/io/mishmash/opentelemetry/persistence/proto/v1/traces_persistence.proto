@@ -74,9 +74,11 @@ message PersistedSpan {
   // https://opentelemetry.io/docs/specs/otel/schemas/#schema-url
   string span_schema_url = 27;
 
+  reserved 28, 29;
+
   // is_valid will be false if the system found this record to not comply with OTLP specs.
-  bool is_valid = 28;
+  bool is_valid = 100;
 
   // when is_valid is false, error_message will provide some information on what was wrong.
-  string error_message = 29;
+  optional string error_message = 101;
 }

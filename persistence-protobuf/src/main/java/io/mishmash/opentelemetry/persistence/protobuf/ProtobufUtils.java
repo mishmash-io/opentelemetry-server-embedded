@@ -15,7 +15,7 @@
  *
  */
 
-package io.mishmash.opentelemetry.persistence.proto;
+package io.mishmash.opentelemetry.persistence.protobuf;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,6 +37,9 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
 
+import io.opentelemetry.proto.common.v1.AnyValue;
+import io.opentelemetry.proto.common.v1.KeyValue;
+
 /**
  * Various helper methods for general protobuf message handling.
  */
@@ -47,34 +50,35 @@ public final class ProtobufUtils {
      *
      * Helps with avoiding unnecessary nesting.
      */
-    private static Map<String, Function<Message, Object>> converters;
+    private static final Map<String, Function<Message, Object>> CONVERTERS =
+            new HashMap<>();
 
     static {
-        converters.put(
+        CONVERTERS.put(
                 BoolValue.getDescriptor().getFullName(),
                 ProtobufUtils::toJsonNestedValue);
-        converters.put(
+        CONVERTERS.put(
                 Int32Value.getDescriptor().getFullName(),
                 ProtobufUtils::toJsonNestedValue);
-        converters.put(
+        CONVERTERS.put(
                 UInt32Value.getDescriptor().getFullName(),
                 ProtobufUtils::toJsonNestedValue);
-        converters.put(
+        CONVERTERS.put(
                 Int64Value.getDescriptor().getFullName(),
                 ProtobufUtils::toJsonNestedValue);
-        converters.put(
+        CONVERTERS.put(
                 UInt64Value.getDescriptor().getFullName(),
                 ProtobufUtils::toJsonNestedValue);
-        converters.put(
+        CONVERTERS.put(
                 StringValue.getDescriptor().getFullName(),
                 ProtobufUtils::toJsonNestedValue);
-        converters.put(
+        CONVERTERS.put(
                 BytesValue.getDescriptor().getFullName(),
                 ProtobufUtils::toJsonNestedValue);
-        converters.put(
+        CONVERTERS.put(
                 FloatValue.getDescriptor().getFullName(),
                 ProtobufUtils::toJsonNestedValue);
-        converters.put(
+        CONVERTERS.put(
                 DoubleValue.getDescriptor().getFullName(),
                 ProtobufUtils::toJsonNestedValue);
 
@@ -97,7 +101,7 @@ public final class ProtobufUtils {
         Map<String, Object> res = new HashMap<>(entries.size());
 
         for (Map.Entry<FieldDescriptor, Object> ent : entries.entrySet()) {
-            res.put(ent.getKey().getJsonName(),
+            res.put(ent.getKey().getName(),
                     toJsonValue(ent.getKey(), ent.getValue()));
         }
 
@@ -114,7 +118,7 @@ public final class ProtobufUtils {
         if (value instanceof Message) {
             Message msg = (Message) value;
             Function<Message, Object> converter =
-                    converters.get(msg.getDescriptorForType().getFullName());
+                    CONVERTERS.get(msg.getDescriptorForType().getFullName());
 
             if (converter != null) {
                 return converter.apply(msg);
@@ -150,16 +154,69 @@ public final class ProtobufUtils {
 
             return resMap;
         } else if (field.isRepeated()) {
-            List<?> valuesList = (List<?>) value;
-            List<Object> resList = new ArrayList<>(valuesList.size());
+            if (FieldDescriptor.Type.MESSAGE.equals(field.getType())
+                    && "opentelemetry.proto.common.v1.KeyValue".equals(
+                            field.getMessageType().getFullName())) {
+                @SuppressWarnings("unchecked")
+                List<KeyValue> kvs = (List<KeyValue>) value;
 
-            for (Object o : valuesList) {
-                resList.add(toJsonValueSingle(field, o));
+                return toJsonValue(kvs);
+            } else {
+                List<?> valuesList = (List<?>) value;
+                List<Object> resList = new ArrayList<>(valuesList.size());
+
+                for (Object o : valuesList) {
+                    resList.add(toJsonValueSingle(field, o));
+                }
+
+                return resList;
             }
-
-            return resList;
         } else {
             return toJsonValueSingle(field, value);
+        }
+    }
+
+    private static Object toJsonValue(final List<KeyValue> kvs) {
+        Map<String, Object> res = new HashMap<>(kvs.size());
+
+        for (KeyValue kv : kvs) {
+            res.put(
+                    kv.getKey(),
+                    toJsonValue(kv.getValue()));
+        }
+
+        return res;
+    }
+
+    private static Object toJsonValue(final AnyValue av) {
+        switch (av.getValueCase()) {
+        case ARRAY_VALUE:
+            List<Object> res = new ArrayList<>(
+                    av.getArrayValue().getValuesCount());
+            for (AnyValue a : av.getArrayValue().getValuesList()) {
+                res.add(toJsonValue(a));
+            }
+
+            return res;
+        case BOOL_VALUE:
+            return av.getBoolValue();
+        case BYTES_VALUE:
+            return av.getBytesValue().toByteArray();
+        case DOUBLE_VALUE:
+            return av.getDoubleValue();
+        case INT_VALUE:
+            return av.getIntValue();
+        case KVLIST_VALUE:
+            return toJsonValue(av.getKvlistValue().getValuesList());
+        case STRING_VALUE:
+            return av.getStringValue();
+        case VALUE_NOT_SET:
+            return null;
+        default:
+            // should not happen!
+            throw new IllegalArgumentException(
+                    String.format("Unsupported AnyValue type '%s'",
+                            av.getValueCase()));
         }
     }
 
@@ -173,6 +230,9 @@ public final class ProtobufUtils {
             if ("google.protobuf.NullValue"
                     .equals(field.getEnumType().getFullName())) {
                 return null;
+            } else if ("opentelemetry.proto.logs.v1.SeverityNumber"
+                    .equals(field.getEnumType().getFullName())) {
+                return ((EnumValueDescriptor) value).getNumber();
             }
 
             return ((EnumValueDescriptor) value).getName();

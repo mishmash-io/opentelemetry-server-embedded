@@ -34,4 +34,4 @@
  * This package on GitHub</a>
  * @see <a href="https://mishmash.io/">mishmash io</a>
  */
-package io.mishmash.opentelemetry.persistence.proto;
+package io.mishmash.opentelemetry.persistence.protobuf;

@@ -25,12 +25,14 @@ import java.util.Map;
 
 import org.apache.druid.data.input.InputEntity;
 import org.apache.druid.data.input.InputRow;
+import org.apache.druid.data.input.InputRowSchema;
 import org.apache.druid.data.input.IntermediateRowParsingReader;
+import org.apache.druid.data.input.impl.MapInputRowParser;
 import org.apache.druid.java.util.common.parsers.CloseableIteratorWithMetadata;
 import org.apache.druid.java.util.common.parsers.ParseException;
 
-import io.mishmash.opentelemetry.persistence.proto.ProtobufProfiles;
 import io.mishmash.opentelemetry.persistence.proto.v1.ProfilesPersistenceProto.PersistedProfile;
+import io.mishmash.opentelemetry.persistence.protobuf.ProtobufProfiles;
 import io.mishmash.opentelemetry.server.collector.ProfileSampleValue;
 import io.mishmash.opentelemetry.server.collector.ProfilesFlattener;
 import io.opentelemetry.proto.collector.profiles.v1experimental.ExportProfilesServiceRequest;
@@ -54,17 +56,24 @@ public class ProfilesReader
      * True if the 'raw' format was configured.
      */
     private boolean isRaw = false;
+    /**
+     * The ingestion schema config.
+     */
+    private InputRowSchema schema;
 
     /**
      * Create an OTLP profiles reader.
      *
+     * @param rowSchema the schema as set in ingestion config
      * @param input the {@link InputEntity} containing protobuf-encoded bytes
      * @param isRawFormat true if input contains a 'raw'
      * {@link ExportProfilesServiceRequest}
      */
     public ProfilesReader(
+            final InputRowSchema rowSchema,
             final InputEntity input,
             final boolean isRawFormat) {
+        this.schema = rowSchema;
         this.source = input;
         this.isRaw = isRawFormat;
     }
@@ -76,8 +85,10 @@ public class ProfilesReader
     protected List<InputRow> parseInputRows(
             final PersistedProfile intermediateRow)
                     throws IOException, ParseException {
-        // TODO Auto-generated method stub
-        return null;
+        return Collections.singletonList(
+                MapInputRowParser.parse(
+                        schema,
+                        ProtobufProfiles.toJsonMap(intermediateRow)));
     }
 
     /**
