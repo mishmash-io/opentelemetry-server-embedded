@@ -15,6 +15,9 @@ Here you can also find implementations of such data sources for a few popular op
 >   visualizations
 > - OpenTelemetry Data Sources for [Apache Pulsar](https://pulsar.apache.org/) for when more
 >   more complex preprocessing is needed
+> - Our [Testcontainers](https://testcontainers.com/) implementations that you can use to
+>   ensure your apps always produce the necessary telemetry, or to track performance across
+>   releases
 >
 > Watch this repository for updates.
 
