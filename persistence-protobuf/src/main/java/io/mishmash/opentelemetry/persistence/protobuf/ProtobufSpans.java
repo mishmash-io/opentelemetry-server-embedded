@@ -113,10 +113,17 @@ public final class ProtobufSpans {
      * encoding.
      *
      * @param span the persisted span protobuf message
+     * @param withDefaults true when defaults for unset fields should also
+     * be included
      * @return the {@link Map}
      */
     public static Map<String, Object> toJsonMap(
-            final PersistedSpan span) {
-        return ProtobufUtils.toJsonMap(span.getAllFields());
+            final PersistedSpan span,
+            final boolean withDefaults) {
+        return ProtobufUtils.toJsonMap(
+                withDefaults
+                    ? ProtobufUtils.withUnsetFields(span)
+                    : span.getAllFields().entrySet(),
+                withDefaults);
     }
 }

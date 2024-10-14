@@ -214,10 +214,17 @@ public final class ProtobufMetrics {
      * encoding.
      *
      * @param metric the persisted metric protobuf message
+     * @param withDefaults true when defaults for unset fields should also
+     * be included
      * @return the {@link Map}
      */
     public static Map<String, Object> toJsonMap(
-            final PersistedMetric metric) {
-        return ProtobufUtils.toJsonMap(metric.getAllFields());
+            final PersistedMetric metric,
+            final boolean withDefaults) {
+        return ProtobufUtils.toJsonMap(
+                withDefaults
+                    ? ProtobufUtils.withUnsetFields(metric)
+                    : metric.getAllFields().entrySet(),
+                withDefaults);
     }
 }

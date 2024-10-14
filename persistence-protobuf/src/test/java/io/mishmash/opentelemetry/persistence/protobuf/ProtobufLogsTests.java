@@ -79,7 +79,7 @@ public class ProtobufLogsTests extends Base {
         Log l = defaultLog();
         PersistedLog pl = ProtobufLogs.buildLog(l).build();
 
-        Map<String, Object> res = ProtobufLogs.toJsonMap(pl);
+        Map<String, Object> res = ProtobufLogs.toJsonMap(pl, false);
 
         testBatchTimestamp((Long) res.get("batch_timestamp"));
         testBatchUUID((String) res.get("batch_UUID"));

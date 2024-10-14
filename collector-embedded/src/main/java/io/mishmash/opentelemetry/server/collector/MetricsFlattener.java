@@ -238,7 +238,7 @@ public class MetricsFlattener implements Iterable<MetricDataPoint> {
          */
         @Override
         public boolean hasNext() {
-            if (currentMetric == null) {
+            if (currentMetric == null || !hasNextDataPoint()) {
                 nextMetric();
 
                 while (currentMetric != null
@@ -282,6 +282,7 @@ public class MetricsFlattener implements Iterable<MetricDataPoint> {
                         currentMetric.getGauge(),
                         itemsCount++,
                         numIt.next());
+                break;
             case HISTOGRAM:
                 dataPoint.setFrom(
                         timestamp,
@@ -293,6 +294,7 @@ public class MetricsFlattener implements Iterable<MetricDataPoint> {
                         currentMetric.getHistogram(),
                         itemsCount++,
                         histIt.next());
+                break;
             case SUM:
                 dataPoint.setFrom(
                         timestamp,
@@ -304,6 +306,7 @@ public class MetricsFlattener implements Iterable<MetricDataPoint> {
                         currentMetric.getSum(),
                         itemsCount++,
                         numIt.next());
+                break;
             case SUMMARY:
                 dataPoint.setFrom(
                         timestamp,
@@ -315,6 +318,7 @@ public class MetricsFlattener implements Iterable<MetricDataPoint> {
                         currentMetric.getSummary(),
                         itemsCount++,
                         summaryIt.next());
+                break;
             default:
                 throw new UnsupportedOperationException(
                         String.format(

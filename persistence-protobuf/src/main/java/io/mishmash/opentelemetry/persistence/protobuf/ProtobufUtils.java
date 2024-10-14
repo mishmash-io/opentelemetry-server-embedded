@@ -17,26 +17,17 @@
 
 package io.mishmash.opentelemetry.persistence.protobuf;
 
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-
-import com.google.protobuf.BoolValue;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.BytesValue;
 import com.google.protobuf.Descriptors.EnumValueDescriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor;
-import com.google.protobuf.DoubleValue;
-import com.google.protobuf.FloatValue;
-import com.google.protobuf.Int32Value;
-import com.google.protobuf.Int64Value;
 import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
-import com.google.protobuf.UInt32Value;
-import com.google.protobuf.UInt64Value;
-
 import io.opentelemetry.proto.common.v1.AnyValue;
 import io.opentelemetry.proto.common.v1.KeyValue;
 
@@ -45,87 +36,71 @@ import io.opentelemetry.proto.common.v1.KeyValue;
  */
 public final class ProtobufUtils {
 
-    /**
-     * Custom converters for some protobuf message types.
-     *
-     * Helps with avoiding unnecessary nesting.
-     */
-    private static final Map<String, Function<Message, Object>> CONVERTERS =
-            new HashMap<>();
-
-    static {
-        CONVERTERS.put(
-                BoolValue.getDescriptor().getFullName(),
-                ProtobufUtils::toJsonNestedValue);
-        CONVERTERS.put(
-                Int32Value.getDescriptor().getFullName(),
-                ProtobufUtils::toJsonNestedValue);
-        CONVERTERS.put(
-                UInt32Value.getDescriptor().getFullName(),
-                ProtobufUtils::toJsonNestedValue);
-        CONVERTERS.put(
-                Int64Value.getDescriptor().getFullName(),
-                ProtobufUtils::toJsonNestedValue);
-        CONVERTERS.put(
-                UInt64Value.getDescriptor().getFullName(),
-                ProtobufUtils::toJsonNestedValue);
-        CONVERTERS.put(
-                StringValue.getDescriptor().getFullName(),
-                ProtobufUtils::toJsonNestedValue);
-        CONVERTERS.put(
-                BytesValue.getDescriptor().getFullName(),
-                ProtobufUtils::toJsonNestedValue);
-        CONVERTERS.put(
-                FloatValue.getDescriptor().getFullName(),
-                ProtobufUtils::toJsonNestedValue);
-        CONVERTERS.put(
-                DoubleValue.getDescriptor().getFullName(),
-                ProtobufUtils::toJsonNestedValue);
-
-    }
-
     private ProtobufUtils() {
         // constructor is hidden
     }
 
     /**
-     * Convert a {@link Map} of fields into a JSON-friendly map.
+     * Prepare a {@link Collection} of entries suitable for
+     * {@link #toJsonMap(Collection, boolean)} when defaults for
+     * unset fields are also needed.
      *
-     * Use to convert all fields of a {@link Message}.
+     * @param msg the {@link Message}
+     * @return a {@link Collection} to pass to
+     * {@link #toJsonMap(Collection, boolean)}
+     */
+    public static Collection<Map.Entry<FieldDescriptor, Object>>
+            withUnsetFields(final Message msg) {
+        return msg.getDescriptorForType().getFields().stream()
+                .map(field -> mapEntry(field,
+                        field.hasPresence() && !msg.hasField(field)
+                            ? null
+                            : msg.getField(field)))
+                .toList();
+    }
+
+    /**
+     * Convert a {@link Collection} of fields into a JSON-friendly map.
+     *
+     * Use to convert all fields of a {@link Message}. Pass either
+     * the return of {@link Message#getAllFields()} (only those fields
+     * that are actually set in the message), or pass the result of
+     * {@link #withUnsetFields(Message)} if you want to include defaults
+     * for fields that are not set in a Message.
      *
      * @param entries the protobuf fields
+     * @param withDefaults pass true when defaults for unset fields are
+     * to be included
      * @return a JSON-friendly {@link Map}
      */
     public static Map<String, Object> toJsonMap(
-            final Map<FieldDescriptor, Object> entries) {
+            final Collection<Map.Entry<FieldDescriptor, Object>> entries,
+            final boolean withDefaults) {
         Map<String, Object> res = new HashMap<>(entries.size());
 
-        for (Map.Entry<FieldDescriptor, Object> ent : entries.entrySet()) {
+        for (Map.Entry<FieldDescriptor, Object> ent : entries) {
             res.put(ent.getKey().getName(),
-                    toJsonValue(ent.getKey(), ent.getValue()));
+                    toJsonValue(ent.getKey(), ent.getValue(), withDefaults));
         }
 
         return res;
     }
 
-    private static Object toJsonValue(
+    private static Map.Entry<FieldDescriptor, Object> mapEntry(
             final FieldDescriptor field,
             final Object value) {
-        if (value == null) {
-            return null;
-        }
+        return new SimpleImmutableEntry<>(field, value);
+    }
 
-        if (value instanceof Message) {
-            Message msg = (Message) value;
-            Function<Message, Object> converter =
-                    CONVERTERS.get(msg.getDescriptorForType().getFullName());
-
-            if (converter != null) {
-                return converter.apply(msg);
-            }
-        }
-
+    private static Object toJsonValue(
+            final FieldDescriptor field,
+            final Object value,
+            final boolean withDefaults) {
         if (field.isMapField()) {
+            if (value == null && withDefaults) {
+                return Collections.<String, Object>emptyMap();
+            }
+
             FieldDescriptor k = field
                                     .getMessageType()
                                     .findFieldByName("key");
@@ -146,10 +121,12 @@ public final class ProtobufUtils {
                 resMap.put(
                         (String) toJsonValueSingle(
                                 k,
-                                ((Message) element).getField(k)),
+                                ((Message) element).getField(k),
+                                withDefaults),
                         toJsonValueSingle(
                                 v,
-                                ((Message) element).getField(v)));
+                                ((Message) element).getField(v),
+                                withDefaults));
             }
 
             return resMap;
@@ -160,41 +137,54 @@ public final class ProtobufUtils {
                 @SuppressWarnings("unchecked")
                 List<KeyValue> kvs = (List<KeyValue>) value;
 
-                return toJsonValue(kvs);
+                return toJsonValue(kvs, withDefaults);
             } else {
                 List<?> valuesList = (List<?>) value;
                 List<Object> resList = new ArrayList<>(valuesList.size());
 
                 for (Object o : valuesList) {
-                    resList.add(toJsonValueSingle(field, o));
+                    resList.add(toJsonValueSingle(field, o, withDefaults));
                 }
 
                 return resList;
             }
         } else {
-            return toJsonValueSingle(field, value);
+            return toJsonValueSingle(field, value, withDefaults);
         }
     }
 
-    private static Object toJsonValue(final List<KeyValue> kvs) {
+    private static Object toJsonValue(
+            final List<KeyValue> kvs,
+            final boolean withDefaults) {
+        if (kvs == null) {
+            return Collections.emptyList();
+        }
+
         Map<String, Object> res = new HashMap<>(kvs.size());
 
         for (KeyValue kv : kvs) {
             res.put(
                     kv.getKey(),
-                    toJsonValue(kv.getValue()));
+                    toJsonValue(kv.getValue(), withDefaults));
         }
 
         return res;
     }
 
-    private static Object toJsonValue(final AnyValue av) {
+    private static Object toJsonValue(
+            final AnyValue av,
+            final boolean withDefaults) {
+        if (av == null && withDefaults) {
+            // return an object, the most 'complex' value type
+            return Collections.<String, Object>emptyMap();
+        }
+
         switch (av.getValueCase()) {
         case ARRAY_VALUE:
             List<Object> res = new ArrayList<>(
                     av.getArrayValue().getValuesCount());
             for (AnyValue a : av.getArrayValue().getValuesList()) {
-                res.add(toJsonValue(a));
+                res.add(toJsonValue(a, withDefaults));
             }
 
             return res;
@@ -207,7 +197,9 @@ public final class ProtobufUtils {
         case INT_VALUE:
             return av.getIntValue();
         case KVLIST_VALUE:
-            return toJsonValue(av.getKvlistValue().getValuesList());
+            return toJsonValue(
+                    av.getKvlistValue().getValuesList(),
+                    withDefaults);
         case STRING_VALUE:
             return av.getStringValue();
         case VALUE_NOT_SET:
@@ -222,41 +214,103 @@ public final class ProtobufUtils {
 
     private static Object toJsonValueSingle(
             final FieldDescriptor field,
-            final Object value) {
+            final Object value,
+            final boolean withDefaults) {
+        if (value == null && !withDefaults) {
+            throw new IllegalArgumentException(
+                    String.format("Unexpected null protobuf field '%s'",
+                            field.getFullName()));
+        }
+
         switch (field.getType()) {
         case BYTES:
-            return ((ByteString) value).toByteArray();
+            return value == null && withDefaults
+                    ? new byte[] {}
+                    : ((ByteString) value).toByteArray();
         case ENUM:
             if ("google.protobuf.NullValue"
                     .equals(field.getEnumType().getFullName())) {
                 return null;
             } else if ("opentelemetry.proto.logs.v1.SeverityNumber"
                     .equals(field.getEnumType().getFullName())) {
-                return ((EnumValueDescriptor) value).getNumber();
+                return value == null && withDefaults
+                        ? Integer.valueOf(0)
+                        : ((EnumValueDescriptor) value).getNumber();
             }
 
-            return ((EnumValueDescriptor) value).getName();
+            return value == null && withDefaults
+                    ? ""
+                    : ((EnumValueDescriptor) value).getName();
         case GROUP:
         case MESSAGE:
-            if (value == null) {
+            if (withDefaults) {
+                if (value == null) {
+                    return Collections.<String, Object>emptyMap();
+                } else {
+                    return toJsonMap(
+                            withUnsetFields((Message) value),
+                            withDefaults);
+                }
+            } else if (value == null) {
                 return null;
             }
 
-            return toJsonMap(((Message) value).getAllFields());
+            return toJsonMap(
+                    ((Message) value).getAllFields().entrySet(),
+                    withDefaults);
+        case BOOL:
+            return value == null && withDefaults
+                    ? Boolean.FALSE
+                    : value;
+        case DOUBLE:
+            return value == null && withDefaults
+                ? Double.valueOf(0.0)
+                : value;
+        case INT32:
+        case SINT32:
+        case UINT32:
+        case FIXED32:
+        case SFIXED32:
+            return value == null && withDefaults
+                ? Integer.valueOf(0)
+                : value;
+        case INT64:
+        case SINT64:
+        case UINT64:
+        case FIXED64:
+        case SFIXED64:
+            return value == null && withDefaults
+                ? Long.valueOf(0)
+                : value;
+        case FLOAT:
+            return value == null && withDefaults
+                ? Float.valueOf(0.0f)
+                : value;
+        case STRING:
+            return value == null && withDefaults
+                ? ""
+                : value;
         default:
-            return value;
+            throw new UnsupportedOperationException(
+                    String.format("Unknown protobuf field type '%s'",
+                            field.getType()));
         }
     }
 
-    private static Object toJsonNestedValue(final Message m) {
+    private static Object toJsonNestedValue(
+            final Message m,
+            final boolean withDefaults) {
         FieldDescriptor v = m.getDescriptorForType().findFieldByName("value");
 
-        if (v == null) {
+        if (v == null && !withDefaults) {
             throw new IllegalArgumentException(
                     String.format("Malformed protobuf message '%s'",
                             m.getDescriptorForType().getFullName()));
         }
 
-        return toJsonValueSingle(v, m.getField(v));
+        return toJsonValueSingle(
+                v,
+                m.getField(v),
+                withDefaults);
     }
 }

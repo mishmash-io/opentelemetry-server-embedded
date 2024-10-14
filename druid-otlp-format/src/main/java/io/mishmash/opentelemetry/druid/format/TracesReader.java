@@ -87,7 +87,7 @@ public class TracesReader extends IntermediateRowParsingReader<PersistedSpan> {
         return Collections.singletonList(
                 MapInputRowParser.parse(
                         schema,
-                        ProtobufSpans.toJsonMap(intermediateRow)));
+                        ProtobufSpans.toJsonMap(intermediateRow, false)));
     }
 
     /**
@@ -96,8 +96,12 @@ public class TracesReader extends IntermediateRowParsingReader<PersistedSpan> {
     @Override
     protected List<Map<String, Object>> toMap(
             final PersistedSpan intermediateRow) throws IOException {
+        /*
+         * This is called when Druid is sampling data, so, provide defaults
+         * for missing fields.
+         */
         return Collections.singletonList(
-                ProtobufSpans.toJsonMap(intermediateRow));
+                ProtobufSpans.toJsonMap(intermediateRow, true));
     }
 
     /**

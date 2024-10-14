@@ -87,7 +87,7 @@ public class LogsReader extends IntermediateRowParsingReader<PersistedLog> {
         return Collections.singletonList(
                 MapInputRowParser.parse(
                         schema,
-                        ProtobufLogs.toJsonMap(intermediateRow)));
+                        ProtobufLogs.toJsonMap(intermediateRow, false)));
     }
 
     /**
@@ -96,8 +96,12 @@ public class LogsReader extends IntermediateRowParsingReader<PersistedLog> {
     @Override
     protected List<Map<String, Object>> toMap(
             final PersistedLog intermediateRow) throws IOException {
+        /*
+         * This is called when Druid is sampling data, so, provide defaults
+         * for missing fields.
+         */
         return Collections.singletonList(
-                ProtobufLogs.toJsonMap(intermediateRow));
+                ProtobufLogs.toJsonMap(intermediateRow, true));
     }
 
     /**

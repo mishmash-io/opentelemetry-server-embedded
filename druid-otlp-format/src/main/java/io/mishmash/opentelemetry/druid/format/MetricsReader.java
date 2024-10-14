@@ -88,7 +88,7 @@ public class MetricsReader
         return Collections.singletonList(
                 MapInputRowParser.parse(
                         schema,
-                        ProtobufMetrics.toJsonMap(intermediateRow)));
+                        ProtobufMetrics.toJsonMap(intermediateRow, false)));
     }
 
     /**
@@ -97,8 +97,12 @@ public class MetricsReader
     @Override
     protected List<Map<String, Object>> toMap(
             final PersistedMetric intermediateRow) throws IOException {
+        /*
+         * This is called when Druid is sampling data, so, provide defaults
+         * for missing fields.
+         */
         return Collections.singletonList(
-                ProtobufMetrics.toJsonMap(intermediateRow));
+                ProtobufMetrics.toJsonMap(intermediateRow, true));
     }
 
     /**
