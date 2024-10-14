@@ -133,9 +133,17 @@ public final class ProtobufLogs {
      * encoding.
      *
      * @param log the persisted log protobuf message
+     * @param withDefaults true when defaults for unset fields should also
+     * be included
      * @return the {@link Map}
      */
-    public static Map<String, Object> toJsonMap(final PersistedLog log) {
-        return ProtobufUtils.toJsonMap(log.getAllFields());
+    public static Map<String, Object> toJsonMap(
+            final PersistedLog log,
+            final boolean withDefaults) {
+        return ProtobufUtils.toJsonMap(
+                withDefaults
+                    ? ProtobufUtils.withUnsetFields(log)
+                    : log.getAllFields().entrySet(),
+                withDefaults);
     }
 }

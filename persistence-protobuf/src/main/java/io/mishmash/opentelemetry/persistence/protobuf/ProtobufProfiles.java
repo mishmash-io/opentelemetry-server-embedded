@@ -448,10 +448,17 @@ public final class ProtobufProfiles {
      * encoding.
      *
      * @param profile the persisted profile protobuf message
+     * @param withDefaults true when defaults for unset fields should also
+     * be included
      * @return the {@link Map}
      */
     public static Map<String, Object> toJsonMap(
-            final PersistedProfile profile) {
-        return ProtobufUtils.toJsonMap(profile.getAllFields());
+            final PersistedProfile profile,
+            final boolean withDefaults) {
+        return ProtobufUtils.toJsonMap(
+                withDefaults
+                    ? ProtobufUtils.withUnsetFields(profile)
+                    : profile.getAllFields().entrySet(),
+                withDefaults);
     }
 }

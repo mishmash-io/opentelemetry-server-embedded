@@ -88,7 +88,7 @@ public class ProfilesReader
         return Collections.singletonList(
                 MapInputRowParser.parse(
                         schema,
-                        ProtobufProfiles.toJsonMap(intermediateRow)));
+                        ProtobufProfiles.toJsonMap(intermediateRow, false)));
     }
 
     /**
@@ -97,8 +97,12 @@ public class ProfilesReader
     @Override
     protected List<Map<String, Object>> toMap(
             final PersistedProfile intermediateRow) throws IOException {
+        /*
+         * This is called when Druid is sampling data, so, provide defaults
+         * for missing fields.
+         */
         return Collections.singletonList(
-                ProtobufProfiles.toJsonMap(intermediateRow));
+                ProtobufProfiles.toJsonMap(intermediateRow, true));
     }
 
     /**
