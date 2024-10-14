@@ -6,10 +6,19 @@ for logs, metrics, traces and profiles signals.
 Here you can also find implementations of such data sources for a few popular open source softwares and additional tools
 to use when working with OpenTelemetry data.
 
-This is a public release of code we have accumulated internally over time and so far contains only a limited subset of
-what we intend to share. Future releases will add modules for authentication and authorization, visualization and more.
+> [!TIP]
+> This is a public release of code we have accumulated internally over time and so far contains only a limited subset of what we intend to share. Future releases will add modules for authentication and authorization, visualizations and more.
+> 
+> Watch this repository for updates.
 
-Watch this repository for updates.
+***Contents:***
+
+- [Introduction to OpenTelemetry for Developers, Data Engineers and Data Scientists](#opentelemetry-for-developers-data-engineers-and-data-scientists)
+- [Software artifacts to:](#artifacts)
+  - [Embed OTLP collectors in Java systems](#embeddable-collectors)
+  - [Save OpenTelemetry to Apache Parquet files](#apache-parquet-stand-alone-server)
+  - [Ingest OpenTelemetry into Apache Druid](#apache-druid-otlp-input-format)
+- [More about OpenTelemetry at mishmash io](#opentelemetry-at-mishmash-io)
 
 # OpenTelemetry for Developers, Data Engineers and Data Scientists
 
