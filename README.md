@@ -53,7 +53,7 @@ There are a number of advantages that OpenTelemetry offers compared to earlier t
   
   You can add telemetry to your existing apps without any code modifications. If you're using
   popular frameworks - they already have OpenTelemetry instrumentation that will just work out
-  of the box. See the [OpenTelemetry docs for your programming language](https://opentelemetry.io/docs/languages/)
+  of the box. See the [OpenTelemetry docs for your programming language.](https://opentelemetry.io/docs/languages/)
 
   Also, you do not need to implement special endpoints and request handlers to supply telemetry.
 - No CPU overhead if telemetry is not emitted:
