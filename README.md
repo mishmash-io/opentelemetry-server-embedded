@@ -1,14 +1,21 @@
 # OpenTelemetry Data Sources for Java
 
-This repository contains [OpenTelemetry](https://opentelemetry.io/) servers that can be embedded into other Java-based systems to act as data sources
-for logs, metrics, traces and profiles signals.
+This repository contains [OpenTelemetry](https://opentelemetry.io/) servers that can be embedded into other Java-based systems to act as data sources for `logs`, `metrics`, `traces` and `profiles` signals.
 
-Here you can also find implementations of such data sources for a few popular open source softwares and additional tools
-to use when working with OpenTelemetry data.
+Here you can also find implementations of such data sources for a few popular open source softwares and additional tools to use when working with OpenTelemetry data.
 
 > [!TIP]
-> This is a public release of code we have accumulated internally over time and so far contains only a limited subset of what we intend to share. Future releases will add modules for authentication and authorization, visualizations and more.
+> This is a public release of code we have accumulated internally over time and so far contains only a limited subset of what we intend to share.
+>
+> Examples of internal software that will be published here in the near future include:
 > 
+> - A small OTLP server based on [Apache BookKeeper](https://bookkeeper.apache.org/) for improved
+>   data ingestion reliability, even across node failures
+> - [Apache Superset](https://superset.apache.org/) charts and dashboards for OpenTelemetry
+>   visualizations
+> - OpenTelemetry Data Sources for [Apache Pulsar](https://pulsar.apache.org/) for when more
+>   more complex preprocessing is needed
+>
 > Watch this repository for updates.
 
 ***Contents:***
