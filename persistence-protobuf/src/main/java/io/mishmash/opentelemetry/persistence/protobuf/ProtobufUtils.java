@@ -21,7 +21,7 @@ import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import com.google.protobuf.ByteString;
@@ -76,7 +76,7 @@ public final class ProtobufUtils {
     public static Map<String, Object> toJsonMap(
             final Collection<Map.Entry<FieldDescriptor, Object>> entries,
             final boolean withDefaults) {
-        Map<String, Object> res = new HashMap<>(entries.size());
+        Map<String, Object> res = new LinkedHashMap<>(entries.size());
 
         for (Map.Entry<FieldDescriptor, Object> ent : entries) {
             res.put(ent.getKey().getName(),
@@ -115,7 +115,8 @@ public final class ProtobufUtils {
             }
 
             List<?> elementsList = (List<?>) value;
-            Map<String, Object> resMap = new HashMap<>(elementsList.size());
+            Map<String, Object> resMap =
+                    new LinkedHashMap<>(elementsList.size());
 
             for (Object element : elementsList) {
                 resMap.put(
@@ -160,7 +161,7 @@ public final class ProtobufUtils {
             return Collections.emptyList();
         }
 
-        Map<String, Object> res = new HashMap<>(kvs.size());
+        Map<String, Object> res = new LinkedHashMap<>(kvs.size());
 
         for (KeyValue kv : kvs) {
             res.put(

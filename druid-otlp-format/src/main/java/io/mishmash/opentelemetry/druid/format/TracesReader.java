@@ -20,8 +20,10 @@ package io.mishmash.opentelemetry.druid.format;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.druid.data.input.InputEntity;
 import org.apache.druid.data.input.InputRow;
@@ -30,6 +32,8 @@ import org.apache.druid.data.input.IntermediateRowParsingReader;
 import org.apache.druid.data.input.impl.MapInputRowParser;
 import org.apache.druid.java.util.common.parsers.CloseableIteratorWithMetadata;
 import org.apache.druid.java.util.common.parsers.ParseException;
+
+import com.google.protobuf.Descriptors.FieldDescriptor;
 
 import io.mishmash.opentelemetry.persistence.proto.v1.TracesPersistenceProto.PersistedSpan;
 import io.mishmash.opentelemetry.persistence.protobuf.ProtobufSpans;
@@ -59,6 +63,10 @@ public class TracesReader extends IntermediateRowParsingReader<PersistedSpan> {
      * The ingestion schema config.
      */
     private InputRowSchema schema;
+    /**
+     * Keeps a reference to all possible dimensions.
+     */
+    private Set<String> tracesDimensions;
 
     /**
      * Create an OTLP traces reader.
@@ -86,7 +94,11 @@ public class TracesReader extends IntermediateRowParsingReader<PersistedSpan> {
                     throws IOException, ParseException {
         return Collections.singletonList(
                 MapInputRowParser.parse(
-                        schema,
+                        schema.getTimestampSpec(),
+                        MapInputRowParser.findDimensions(
+                                schema.getTimestampSpec(),
+                                schema.getDimensionsSpec(),
+                                allDimensions()),
                         ProtobufSpans.toJsonMap(intermediateRow, false)));
     }
 
@@ -176,5 +188,33 @@ public class TracesReader extends IntermediateRowParsingReader<PersistedSpan> {
         it.setMeta("batchUUID", span.getBatchUUID());
         it.setMeta("batchTimestamp", span.getBatchTimestamp());
         it.setMeta("seqNo", span.getSeqNo());
+    }
+
+    /**
+     * Return all possible dimensions names.
+     *
+     * This method is used to compute a full list of dimension names
+     * (including optional values that might be missing) when supplying rows.
+     *
+     * @return a {@link Set} of all possible dimension names
+     */
+    protected Set<String> allDimensions() {
+        if (tracesDimensions == null) {
+            tracesDimensions = new HashSet<>();
+
+            for (FieldDescriptor field : PersistedSpan
+                                            .getDescriptor()
+                                            .getFields()) {
+                /*
+                 * Exclude dimensions that might have been reconfigured
+                 * as metrics instead.
+                 */
+                if (!schema.getMetricNames().contains(field.getName())) {
+                    tracesDimensions.add(field.getName());
+                }
+            }
+        }
+
+        return tracesDimensions;
     }
 }

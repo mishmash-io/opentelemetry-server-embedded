@@ -20,8 +20,10 @@ package io.mishmash.opentelemetry.druid.format;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.druid.data.input.InputEntity;
 import org.apache.druid.data.input.InputRow;
@@ -30,6 +32,8 @@ import org.apache.druid.data.input.IntermediateRowParsingReader;
 import org.apache.druid.data.input.impl.MapInputRowParser;
 import org.apache.druid.java.util.common.parsers.CloseableIteratorWithMetadata;
 import org.apache.druid.java.util.common.parsers.ParseException;
+
+import com.google.protobuf.Descriptors.FieldDescriptor;
 
 import io.mishmash.opentelemetry.persistence.proto.v1.ProfilesPersistenceProto.PersistedProfile;
 import io.mishmash.opentelemetry.persistence.protobuf.ProtobufProfiles;
@@ -49,6 +53,15 @@ public class ProfilesReader
         extends IntermediateRowParsingReader<PersistedProfile> {
 
     /**
+     * The list of default candidates for metrics columns.
+     */
+    private static final String[] DEFAULT_METRIC_NAMES = new String[] {
+            "duration_nanos",
+            "period",
+            "value"
+    };
+
+    /**
      * The source to read data from.
      */
     private InputEntity source;
@@ -60,6 +73,14 @@ public class ProfilesReader
      * The ingestion schema config.
      */
     private InputRowSchema schema;
+    /**
+     * Keeps a reference to all possible dimensions.
+     */
+    private Set<String> profilesDimensions;
+    /**
+     * Keeps a reference to all possible metrics.
+     */
+    private Set<String> profilesMetrics;
 
     /**
      * Create an OTLP profiles reader.
@@ -76,6 +97,29 @@ public class ProfilesReader
         this.schema = rowSchema;
         this.source = input;
         this.isRaw = isRawFormat;
+
+        profilesMetrics = new HashSet<>();
+
+        /*
+         * Before we configure the defaults for metrics -
+         * make sure a column is not already considered a
+         * dimension instead.
+         */
+        Set<String> configuredDimensions = new HashSet<>();
+        configuredDimensions.addAll(rowSchema
+                                        .getDimensionsSpec()
+                                        .getDimensionNames());
+        configuredDimensions.addAll(rowSchema
+                                        .getDimensionsSpec()
+                                        .getDimensionExclusions());
+
+        for (int i = 0; i < DEFAULT_METRIC_NAMES.length; i++) {
+            String metricName = DEFAULT_METRIC_NAMES[i];
+
+            if (!configuredDimensions.contains(metricName)) {
+                profilesMetrics.add(metricName);
+            }
+        }
     }
 
     /**
@@ -87,7 +131,11 @@ public class ProfilesReader
                     throws IOException, ParseException {
         return Collections.singletonList(
                 MapInputRowParser.parse(
-                        schema,
+                        schema.getTimestampSpec(),
+                        MapInputRowParser.findDimensions(
+                                schema.getTimestampSpec(),
+                                schema.getDimensionsSpec(),
+                                allDimensions()),
                         ProtobufProfiles.toJsonMap(intermediateRow, false)));
     }
 
@@ -183,5 +231,29 @@ public class ProfilesReader
         it.setMeta("profileSeqNo", profile.getProfileSeqNo());
         it.setMeta("sampleSeqNo", profile.getSampleSeqNo());
         it.setMeta("valueSeqNo", profile.getValueSeqNo());
+    }
+
+    /**
+     * Return all possible dimensions names.
+     *
+     * This method is used to compute a full list of dimension names
+     * (including optional values that might be missing) when supplying rows.
+     *
+     * @return a {@link Set} of all possible dimension names
+     */
+    protected Set<String> allDimensions() {
+        if (profilesDimensions == null) {
+            profilesDimensions = new HashSet<>();
+
+            for (FieldDescriptor field : PersistedProfile
+                                            .getDescriptor()
+                                            .getFields()) {
+                if (!profilesMetrics.contains(field.getName())) {
+                    profilesDimensions.add(field.getName());
+                }
+            }
+        }
+
+        return profilesDimensions;
     }
 }
