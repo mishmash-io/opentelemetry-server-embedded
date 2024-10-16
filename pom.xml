@@ -19,7 +19,7 @@
 
   <groupId>io.mishmash.opentelemetry</groupId>
   <artifactId>opentelemetry-server-embedded</artifactId>
-  <version>1.1.3</version>
+  <version>1.1.4</version>
   <packaging>pom</packaging>
 
   <name>OpenTelemetry Data Sources for Java</name>
