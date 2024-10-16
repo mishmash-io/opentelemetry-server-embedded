@@ -1,3 +1,4 @@
+#!/bin/bash
 #    Copyright 2024 Mishmash IO UK Ltd.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,16 +13,16 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-FROM maven AS builder
+export FLASK_APP=superset
 
-WORKDIR /tmp/maven-deps
-RUN --mount=type=bind,source=.,target=/tmp/maven-deps,rw,Z cd /tmp/maven-deps && \
-    mvn -DskipTests clean install
-
-FROM apache/druid:30.0.1
-
-WORKDIR /opt/druid
-RUN mkdir /opt/druid/.m2
-RUN --mount=type=bind,from=builder,source=/root/.m2,target=/opt/druid/.m2 bin/run-java \
-    -classpath "lib/*" org.apache.druid.cli.Main tools pull-deps \
-    --no-default-hadoop -c "io.mishmash.opentelemetry:druid-otlp-format:1.1.3"
+# Just init everything as a completely new Superset installation:
+superset db upgrade && \
+superset fab create-admin \
+    --username admin \
+    --firstname OpenTelemetry \
+    --lastname Demo \
+    --email os@mishmash.io \
+    --password admin && \
+superset init && \
+superset import-directory /app/opentelemetry-import-resources && \
+exec superset run -p 8088 --with-threads -h 0.0.0.0
