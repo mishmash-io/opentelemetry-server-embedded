@@ -79,6 +79,13 @@ using the [Apache Parquet Stand-alone server](./server-parquet) contained in thi
 
 If you are the sort of person who prefers to learn by looking at **actual data** - start with the [OpenTelemetry Basics Notebook.](./examples/notebooks/basics.ipynb)
 
+> [!TIP]
+> If you're wondering how to get your first OpenTelemetry data sets - check out [our fork of OpenTelemetry's Demo app.](https://github.com/mishmash-io/opentelemetry-demos)
+>
+> In there you will find complete deployments that will generate signals, save them and let you play with the data - by writing your own notebooks or creating
+> Apache Superset dashboards.
+> 
+
 # Artifacts
 
 ## Embeddable collectors
@@ -95,6 +102,7 @@ It is not intended for production use, but rather as a quick tool to save and ex
 Parquet files as saved by this Stand-alone server.
 - [README](./server-parquet)
 - [Javadoc on javadoc.io](https://javadoc.io/doc/io.mishmash.opentelemetry/server-parquet)
+- [Quick deployment with a demo app](https://github.com/mishmash-io/opentelemetry-demos)
 
 ## Apache Druid OTLP Input Format
 
@@ -113,6 +121,7 @@ like with [Apache BookKeeper](https://bookkeeper.apache.org) or [Apache Pulsar](
 Find out more about the OTLP Input Format for Apache Druid:
 - [README](./druid-otlp-format)
 - [Javadoc on javadoc.io](https://javadoc.io/doc/io.mishmash.opentelemetry/druid-otlp-format)
+- [Quick deployment with a demo app and Apache Superset](https://github.com/mishmash-io/opentelemetry-demos)
 
 ## Apache Superset charts and dashboards
 
