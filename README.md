@@ -133,6 +133,8 @@ You can use its rich visualizations, no-code viz builder and its powerful SQL ID
 
 To get you started, we're publishing [data sources and visualizations](./superset-visualizations) that you can import into Apache Superset.
 
+- [Quick deployment with a demo app](https://github.com/mishmash-io/opentelemetry-demos)
+  
 # OpenTelemetry at mishmash io
 
 OpenTelemetry's main intent is the observability of production environments, but at [mishmash io](https://mishmash.io) it is part of our software development process. By saving telemetry from  **experiments** and **tests** of 
