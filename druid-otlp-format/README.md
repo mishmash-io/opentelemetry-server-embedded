@@ -1,5 +1,7 @@
 # Apache Druid extension for OpenTelemetry singals ingestion
 
+![druid-otlp-ingestion](https://github.com/user-attachments/assets/1b6d064e-7335-4365-a694-8cc2eebf1348)
+
 This artifact implements an Apache Druid extension that you can use to ingest 
 [OpenTelemetry](https://opentelemetry.io) signals - `logs`, `metrics`, `traces` and `profiles` - into Apache Druid, and then query Druid through interactive charts and dashboards.
 
@@ -36,6 +38,8 @@ To get an idea of why and when to use this Druid extension - here is an example 
    by the Kafka Exporter.
 5. Setup [Apache Superset](https://superset.apache.org/) with a [Druid database driver.](https://superset.apache.org/docs/configuration/databases#apache-druid)
 6. Explore your telemetry in Superset!
+
+![superset-dashboard](https://github.com/user-attachments/assets/8dba1e13-bcb3-41c9-ac40-0c023a3825c8)
 
 > [!TIP]
 > We have prepared a clone of [OpenTelemetry's demo app](https://opentelemetry.io/docs/demo/) with
