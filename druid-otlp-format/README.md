@@ -294,6 +294,8 @@ that is being prepared. It has the same format as above and you can paste the co
 parameters (take the correct config from above). Once you do that - switch back to the `Parse data`
 tab and voila!
 
+See a [step by step Druid GUI console guide here.](./DRUID_GUI_SETUP.md)
+
 # OpenTelemetry at mishmash io
 
 OpenTelemetry's main intent is the observability of production environments, but at [mishmash io](https://mishmash.io) it is part of our software development process. By saving telemetry from  **experiments** and **tests** of 
