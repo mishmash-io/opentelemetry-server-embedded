@@ -1,0 +1,36 @@
+{
+  "type": "kafka",
+  "spec": {
+    "ioConfig": {
+      "type": "kafka",
+      "consumerProperties": {
+        "bootstrap.servers": "opentelemetry-demo-kafka:9092"
+      },
+      "topic": "otlp_metrics",
+      "inputFormat": {
+        "type": "otlp",
+        "otlpInputSignal": "metricsRaw"
+      },
+      "useEarliestOffset": true
+    },
+    "tuningConfig": {
+      "type": "kafka"
+    },
+    "dataSchema": {
+      "dataSource": "otlp_metrics",
+      "timestampSpec": {
+        "column": "time_unix_nano",
+        "format": "nano"
+      },
+      "dimensionsSpec": {
+        "useSchemaDiscovery": true,
+        "dimensionExclusions": []
+      },
+      "granularitySpec": {
+        "queryGranularity": "none",
+        "rollup": false,
+        "segmentGranularity": "hour"
+      }
+    }
+  }
+}
