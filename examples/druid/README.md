@@ -9,7 +9,7 @@ Assuming the OTLP Extension is enabled inside Druid, you can just `HTTP POST` on
 For example, to setup an ingestion job for `logs`, as produced by the
 [OpenTelemetry Kafka Exporter:](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/exporter/kafkaexporter/README.md)
 
-> [!NOTICE]
+> [!NOTE]
 > Replace `DRUID_ROUTER_HOST` and `DRUID_ROUTER_PORT` with the actual host name and port of
 > your Druid Router instance.
 >
