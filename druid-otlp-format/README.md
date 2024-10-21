@@ -108,6 +108,12 @@ other things - where it should look for data, what the data format is, etc.
 To apply this extension to your data source - write an `ingestion spec` the way you normally would,
 just set the ***InputFormat*** section to:
 
+> [!TIP]
+> We've created some example ingestion specs.
+>
+> [See the examples here.](../examples/druid/)
+>
+
 - when ingesting `logs` signals:
   - when produced by the **OpenTelemetry Kafka Exporter:**
     ```json
