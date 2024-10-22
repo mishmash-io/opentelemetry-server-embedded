@@ -1,4 +1,4 @@
-# OpenTelemetry Data Sources for Java
+# OpenTelemetry Data Sources for Java (and other)
 
 This repository contains [OpenTelemetry](https://opentelemetry.io/) servers that can be embedded into other Java-based systems to act as data sources for `logs`, `metrics`, `traces` and `profiles` signals.
 
@@ -9,6 +9,8 @@ Here you can also find implementations of such data sources for a few popular op
 - for real-time analytics with Apache Druid and Apache Superset
 - for Machine Learning and AI
 
+You will also find additional tools, examples and demos that might be of service on your own OpenTelemetry journey.
+
 > [!TIP]
 > This is a public release of code we have accumulated internally over time and so far contains only a limited subset of what we intend to share.
 >
@@ -16,8 +18,6 @@ Here you can also find implementations of such data sources for a few popular op
 > 
 > - A small OTLP server based on [Apache BookKeeper](https://bookkeeper.apache.org/) for improved
 >   data ingestion reliability, even across node failures
-> - [Apache Superset](https://superset.apache.org/) charts and dashboards for OpenTelemetry
->   visualizations
 > - OpenTelemetry Data Sources for [Apache Pulsar](https://pulsar.apache.org/) for when more
 >   more complex preprocessing is needed
 > - Our [Testcontainers](https://testcontainers.com/) implementations that you can use to
@@ -35,6 +35,7 @@ Here you can also find implementations of such data sources for a few popular op
   - [Embed OTLP collectors in Java systems](#embeddable-collectors)
   - [Save OpenTelemetry to Apache Parquet files](#apache-parquet-stand-alone-server)
   - [Ingest OpenTelemetry into Apache Druid](#apache-druid-otlp-input-format)
+  - [Visualize OpenTelemetry with Apache Superset](#apache-superset-charts-and-dashboards)
 - [More about OpenTelemetry at mishmash io](#opentelemetry-at-mishmash-io)
 
 # Why you should switch to OpenTelemetry
@@ -115,6 +116,13 @@ And this is the second reason why we believe you might find the software here us
 
 Following are quick introductions of the individual software packages, where you can find more information.
 
+> [!TIP]
+> If you're wondering how to get your first OpenTelemetry data sets - check out [our fork of OpenTelemetry's Demo app.](https://github.com/mishmash-io/opentelemetry-demos)
+>
+> In there you will find complete deployments that will generate signals, save them and let you play with the data - by writing your own notebooks or creating
+> Apache Superset dashboards.
+> 
+
 # Artifacts
 
 ## Embeddable collectors
@@ -131,6 +139,7 @@ It is not intended for production use, but rather as a quick tool to save and ex
 Parquet files as saved by this Stand-alone server.
 - [README](./server-parquet)
 - [Javadoc on javadoc.io](https://javadoc.io/doc/io.mishmash.opentelemetry/server-parquet)
+- [Quick deployment with a demo app](https://github.com/mishmash-io/opentelemetry-demos)
 
 ## Apache Druid OTLP Input Format
 
@@ -149,7 +158,20 @@ like with [Apache BookKeeper](https://bookkeeper.apache.org) or [Apache Pulsar](
 Find out more about the OTLP Input Format for Apache Druid:
 - [README](./druid-otlp-format)
 - [Javadoc on javadoc.io](https://javadoc.io/doc/io.mishmash.opentelemetry/druid-otlp-format)
+- [Quick deployment with a demo app and Apache Superset](https://github.com/mishmash-io/opentelemetry-demos)
 
+## Apache Superset charts and dashboards
+
+![superset-dashboard](https://github.com/user-attachments/assets/8dba1e13-bcb3-41c9-ac40-0c023a3825c8)
+
+[Apache Superset](https://superset.apache.org/) is an open-source modern data exploration and visualization platform.
+
+You can use its rich visualizations, no-code viz builder and its powerful SQL IDE to build your own OpenTelemetry analytics.
+
+To get you started, we're publishing [data sources and visualizations](./superset-visualizations) that you can import into Apache Superset.
+
+- [Quick deployment with a demo app](https://github.com/mishmash-io/opentelemetry-demos)
+  
 # OpenTelemetry at mishmash io
 
 OpenTelemetry's main intent is the observability of production environments, but at [mishmash io](https://mishmash.io) it is part of our software development process. By saving telemetry from  **experiments** and **tests** of 
