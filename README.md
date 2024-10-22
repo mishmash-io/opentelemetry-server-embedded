@@ -112,6 +112,8 @@ And this is the second reason why we believe you might find the software here us
 >
 > They preform transformations, once - on **OTLP packet reception,** to minimize the overhead that would otherwise be incurred every time you run an analytics job or query.
 
+Following are quick introductions of the individual software packages, where you can find more information.
+
 # Artifacts
 
 ## Embeddable collectors
