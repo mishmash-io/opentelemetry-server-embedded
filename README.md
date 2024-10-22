@@ -4,6 +4,11 @@ This repository contains [OpenTelemetry](https://opentelemetry.io/) servers that
 
 Here you can also find implementations of such data sources for a few popular open source softwares and additional tools to use when working with OpenTelemetry data.
 
+**Blend** and **bundle** them to build your own **Observability backends:**
+- for batch processing with Apache Spark or Hive
+- for real-time analytics with Apache Druid and Apache Superset
+- for Machine Learning and AI
+
 > [!TIP]
 > This is a public release of code we have accumulated internally over time and so far contains only a limited subset of what we intend to share.
 >
@@ -25,6 +30,7 @@ Here you can also find implementations of such data sources for a few popular op
 
 - [How OpenTelemetry compares to other telemetry software](#why-you-should-switch-to-opentelemetry)
 - [Introduction to OpenTelemetry for Developers, Data Engineers and Data Scientists](#opentelemetry-for-developers-data-engineers-and-data-scientists)
+- [When and where should you use the code here](#when-and-where-should-you-use-the-software-in-this-repository)
 - [Software artifacts to:](#artifacts)
   - [Embed OTLP collectors in Java systems](#embeddable-collectors)
   - [Save OpenTelemetry to Apache Parquet files](#apache-parquet-stand-alone-server)
@@ -77,6 +83,34 @@ We have prepared a few Jupyter notebooks that visually explore OpenTelemetry dat
 using the [Apache Parquet Stand-alone server](./server-parquet) contained in this repository.
 
 If you are the sort of person who prefers to learn by looking at **actual data** - start with the [OpenTelemetry Basics Notebook.](./examples/notebooks/basics.ipynb)
+
+# When and where should you use the software in this repository
+
+We, at [mishmsah io,](https://mishmash.io/) have been using OpenTelemetry for quite some time - recording telemetry from experiments, unit and integration tests - to ensure every new release
+of software we develop is performing better than the last, and within reasonable computing-resource usage. (More on this [here.](https://mishmash.io/open_source/opentelemetry))
+
+> [!TIP]
+> OpenTelemetry is great for **monitoring software in production,** but we believe you should adopt it within your **software development process** too.
+
+Having been through that journey ourselves, we've realised that success depends on strong analytics.OpenTelemetry provides a number of tools to [instrument your code](https://opentelemetry.io/docs/concepts/instrumentation/) to emit signals, and then to compose data transmission pipelines for these signals.
+
+You can compose such pipelines using the [OpenTelemetry Collector,](https://opentelemetry.io/docs/collector/) which in turn uses a network protocol called [OTLP.](https://opentelemetry.io/docs/specs/otel/protocol/)
+
+As a network protocol, OTLP is great at reducing the number of bytes transmitted, keeping the throughput high with minimum overhead. It does this by heavily `nesting` its messages - to avoid
+data duplication and take maximum advantage of `dictionary encodings` and data compression.
+
+On the **analytics side** though - heavily nested structures are not optimal. A simple `count(*)` or
+`sum()` query, done over millions of OTLP messages, will have to `unnest` each one of them. Every time you run that query.
+
+And this is the second reason why we believe you might find the software here useful:
+
+> [!TIP]
+> When doing analytics on your observability data - you need a suitable data schema.
+>
+> The tools in this repository convert OTLP messages into a 'flatter' schema, that's more suitable
+> for analytics.
+>
+> They preform transformations, once - on **OTLP packet reception,** to minimize the overhead that would otherwise be incurred every time you run an analytics job or query.
 
 # Artifacts
 
