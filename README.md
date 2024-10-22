@@ -111,7 +111,7 @@ And this is the second reason why we believe you might find the software here us
 > The tools in this repository convert OTLP messages into a 'flatter' schema, that's more suitable
 > for analytics.
 >
-> They preform transformations, once - on **OTLP packet reception,** to minimize the overhead that would otherwise be incurred every time you run an analytics job or query.
+> They preform transformations, **only once** - on **OTLP packet reception,** to minimize the overhead that would otherwise be incurred every time you run an analytics job or query.
 
 Following are quick introductions of the individual software packages, where you can find more information.
 
