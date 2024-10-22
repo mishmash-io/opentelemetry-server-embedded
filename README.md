@@ -92,9 +92,9 @@ of software we develop is performing better than the last, and within reasonable
 > [!TIP]
 > OpenTelemetry is great for **monitoring software in production,** but we believe you should adopt it within your **software development process** too.
 
-Having been through that journey ourselves, we've realised that success depends on strong analytics.OpenTelemetry provides a number of tools to [instrument your code](https://opentelemetry.io/docs/concepts/instrumentation/) to emit signals, and then to compose data transmission pipelines for these signals.
+Having been through that journey ourselves, we've realised that success depends on strong analytics. OpenTelemetry provides a number of tools to [instrument your code](https://opentelemetry.io/docs/concepts/instrumentation/) to emit signals, and then to compose data transmission pipelines for these signals. And leaves it to you to decide what you ultimately want to do with your signals: where you want to store them depends on how you will work with them.
 
-You can compose such pipelines using the [OpenTelemetry Collector,](https://opentelemetry.io/docs/collector/) which in turn uses a network protocol called [OTLP.](https://opentelemetry.io/docs/specs/otel/protocol/)
+You can compose such pipelines for signals transmition using the [OpenTelemetry Collector,](https://opentelemetry.io/docs/collector/) which in turn uses a network protocol called [OTLP.](https://opentelemetry.io/docs/specs/otel/protocol/) At the end - you have to `terminate` the pipelines into an `observability (or OTLP) backend.`
 
 As a network protocol, OTLP is great at reducing the number of bytes transmitted, keeping the throughput high with minimum overhead. It does this by heavily `nesting` its messages - to avoid
 data duplication and take maximum advantage of `dictionary encodings` and data compression.
