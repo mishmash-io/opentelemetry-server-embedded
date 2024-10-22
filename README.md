@@ -82,7 +82,8 @@ If the above sounds convincing - keep reading through this document and explore 
 We have prepared a few Jupyter notebooks that visually explore OpenTelemetry data that we collected from [a demo Astronomy webshop app](https://github.com/mishmash-io/opentelemetry-demos)
 using the [Apache Parquet Stand-alone server](./server-parquet) contained in this repository.
 
-If you are the sort of person who prefers to learn by looking at **actual data** - start with the [OpenTelemetry Basics Notebook.](./examples/notebooks/basics.ipynb)
+> [!TIP]
+> If you are the sort of person who prefers to learn by looking at **actual data** - start with the [OpenTelemetry Basics Notebook.](./examples/notebooks/basics.ipynb)
 
 # When and where should you use the software in this repository
 
