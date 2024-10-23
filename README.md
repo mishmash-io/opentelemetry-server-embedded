@@ -1,10 +1,8 @@
-# OpenTelemetry Data Sources for Java (and other)
+# OpenTelemetry and Apache Big Data, United by mishmash io
 
-This repository contains [OpenTelemetry](https://opentelemetry.io/) servers that can be embedded into other Java-based systems to act as data sources for `logs`, `metrics`, `traces` and `profiles` signals.
+This repository contains code that receives and adapts [OpenTelemetry](https://opentelemetry.io/) signals - like `logs`, `metrics`, `traces` and `profiles` - to Open Source projects of the [Apache](https://www.apache.org/) analytics ecosystem.
 
-Here you can also find implementations of such data sources for a few popular open source softwares and additional tools to use when working with OpenTelemetry data.
-
-**Blend** and **bundle** them to build your own **Observability backends:**
+**Blend** and **bundle** them to build your own **Observability analytics backends:**
 - for batch processing with Apache Spark or Hive
 - for real-time analytics with Apache Druid and Apache Superset
 - for Machine Learning and AI
