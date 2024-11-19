@@ -74,7 +74,7 @@
 
   <properties>
     <parquet.version>1.14.3</parquet.version>
-    <hadoop.version>3.4.0</hadoop.version>
+    <hadoop.version>3.4.1</hadoop.version>
   </properties>
 
   <build>
