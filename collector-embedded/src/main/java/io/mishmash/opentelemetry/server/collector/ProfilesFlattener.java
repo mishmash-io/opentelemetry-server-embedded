@@ -21,11 +21,11 @@ import java.util.Iterator;
 import java.util.UUID;
 
 import io.opentelemetry.context.Context;
-import io.opentelemetry.proto.collector.profiles.v1experimental.ExportProfilesServiceRequest;
-import io.opentelemetry.proto.profiles.v1experimental.ProfileContainer;
-import io.opentelemetry.proto.profiles.v1experimental.ResourceProfiles;
-import io.opentelemetry.proto.profiles.v1experimental.Sample;
-import io.opentelemetry.proto.profiles.v1experimental.ScopeProfiles;
+import io.opentelemetry.proto.collector.profiles.v1development.ExportProfilesServiceRequest;
+import io.opentelemetry.proto.profiles.v1development.Profile;
+import io.opentelemetry.proto.profiles.v1development.ResourceProfiles;
+import io.opentelemetry.proto.profiles.v1development.Sample;
+import io.opentelemetry.proto.profiles.v1development.ScopeProfiles;
 import io.vertx.ext.auth.User;
 
 /**
@@ -38,7 +38,7 @@ import io.vertx.ext.auth.User;
  * by {@link ExportProfilesServiceRequest}, contains lists of
  * individual values (of type long). These lists are nested
  * into lists of {@link Sample}s, which are in turn
- * nested inside a list of {@link ProfileContainer}s, which are
+ * nested inside a list of {@link Profile}s, which are
  * again nested into a list of {@link ScopeProfiles}, further
  * nested into a list of {@link ResourceProfiles}.
  *
@@ -184,10 +184,10 @@ public class ProfilesFlattener implements Iterable<ProfileSampleValue> {
          */
         private Iterator<ScopeProfiles> scopeIt;
         /**
-         * Iterator over the OTLP Profile containers within an OTLP
+         * Iterator over the OTLP Profiles within an OTLP
          * Scope Profile.
          */
-        private Iterator<ProfileContainer> profileIt;
+        private Iterator<Profile> profileIt;
         /**
          * Iterator over the OTLP Sample within an OTLP Profile.
          */
@@ -207,7 +207,7 @@ public class ProfilesFlattener implements Iterable<ProfileSampleValue> {
         /**
          * The current OTLP Profile Container.
          */
-        private ProfileContainer currentProfile;
+        private Profile currentProfile;
         /**
          * The current OTLP Sample.
          */
@@ -288,9 +288,9 @@ public class ProfilesFlattener implements Iterable<ProfileSampleValue> {
                     currentScope,
                     profilesCount,
                     currentProfile,
-                    currentProfile.getProfile(),
                     samplesCount,
-                    ++valuesCount);
+                    ++valuesCount,
+                    request.getDictionary());
 
             itemsCount++;
 
@@ -307,7 +307,6 @@ public class ProfilesFlattener implements Iterable<ProfileSampleValue> {
                 while (currentProfile != null
                         && !(
                                 sampleIt = currentProfile
-                                        .getProfile()
                                         .getSampleList()
                                         .iterator()
                             ).hasNext()) {

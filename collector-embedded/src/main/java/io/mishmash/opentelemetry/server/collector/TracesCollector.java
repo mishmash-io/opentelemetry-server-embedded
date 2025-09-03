@@ -21,13 +21,13 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import io.grpc.MethodDescriptor;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.proto.collector.trace.v1.ExportTracePartialSuccess;
 import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest;
 import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceResponse;
 import io.vertx.core.Vertx;
+import io.vertx.grpc.common.ServiceMethod;
 
 /**
  * Processes incoming OpenTelemetry traces packets - extracts individual
@@ -55,7 +55,7 @@ public class TracesCollector
      * @param otel a helper for own telemetry needs
      */
     public TracesCollector(
-            final MethodDescriptor<
+            final ServiceMethod<
                 ExportTraceServiceRequest,
                 ExportTraceServiceResponse> exportMethod,
             final Instrumentation otel) {

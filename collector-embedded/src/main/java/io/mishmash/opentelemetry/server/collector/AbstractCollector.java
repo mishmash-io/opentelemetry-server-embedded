@@ -37,7 +37,6 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Parser;
 import com.google.protobuf.util.JsonFormat;
 
-import io.grpc.MethodDescriptor;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
@@ -59,6 +58,7 @@ import io.vertx.ext.auth.User;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.grpc.common.GrpcStatus;
+import io.vertx.grpc.common.ServiceMethod;
 import io.vertx.grpc.server.GrpcServer;
 import io.vertx.grpc.server.GrpcServerRequest;
 
@@ -161,7 +161,7 @@ public abstract class AbstractCollector<
     /**
      * The gRPC method that this collector handles.
      */
-    private MethodDescriptor<REQ, RESP> grpcMethod;
+    private ServiceMethod<REQ, RESP> grpcMethod;
 
     /**
      * A parser for the request object.
@@ -273,7 +273,7 @@ public abstract class AbstractCollector<
      */
     public AbstractCollector(
             final String httpUrlPath,
-            final MethodDescriptor<REQ, RESP> exportMethod,
+            final ServiceMethod<REQ, RESP> exportMethod,
             final Instrumentation otelHelper,
             final Supplier<Parser<REQ>> requestParser,
             final Supplier<Message.Builder> requestBuilder,

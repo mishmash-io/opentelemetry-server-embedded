@@ -39,7 +39,7 @@ import io.mishmash.opentelemetry.persistence.proto.v1.ProfilesPersistenceProto.P
 import io.mishmash.opentelemetry.persistence.protobuf.ProtobufProfiles;
 import io.mishmash.opentelemetry.server.collector.ProfileSampleValue;
 import io.mishmash.opentelemetry.server.collector.ProfilesFlattener;
-import io.opentelemetry.proto.collector.profiles.v1experimental.ExportProfilesServiceRequest;
+import io.opentelemetry.proto.collector.profiles.v1development.ExportProfilesServiceRequest;
 
 /**
  * An {@link IntermediateRowParsingReader} for OpenTelemetry profiles signals.

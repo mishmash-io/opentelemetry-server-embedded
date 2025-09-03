@@ -19,11 +19,11 @@ package io.mishmash.opentelemetry.server.collector;
 
 import io.opentelemetry.context.Context;
 import io.opentelemetry.proto.common.v1.InstrumentationScope;
-import io.opentelemetry.proto.profiles.v1experimental.Profile;
-import io.opentelemetry.proto.profiles.v1experimental.ProfileContainer;
-import io.opentelemetry.proto.profiles.v1experimental.ResourceProfiles;
-import io.opentelemetry.proto.profiles.v1experimental.Sample;
-import io.opentelemetry.proto.profiles.v1experimental.ScopeProfiles;
+import io.opentelemetry.proto.profiles.v1development.Profile;
+import io.opentelemetry.proto.profiles.v1development.ProfilesDictionary;
+import io.opentelemetry.proto.profiles.v1development.ResourceProfiles;
+import io.opentelemetry.proto.profiles.v1development.Sample;
+import io.opentelemetry.proto.profiles.v1development.ScopeProfiles;
 import io.opentelemetry.proto.resource.v1.Resource;
 import io.vertx.ext.auth.User;
 
@@ -74,9 +74,9 @@ public class ProfileSampleValue
      */
     private int profileSeqNo;
     /**
-     * The OTLP ProfileContainer.
+     * The dictonary to resolve table lookups.
      */
-    private ProfileContainer profileContainer;
+    private ProfilesDictionary dictionary;
     /**
      * The OTLP Profile.
      */
@@ -140,11 +140,11 @@ public class ProfileSampleValue
      * @param scopeProfile the scope profile
      * @param profileSequenceNum the sequence number of the profile as
      * received from the client
-     * @param container an OTLP profile container
      * @param otelProfile the OTLP profile
      * @param sampleSequenceNum the sequence number of a sample within
      * the profile
      * @param valueSequenceNum the sequence number of an individual value
+     * @param lookup the profiles dictionary of repeated values
      */
     public void setFrom(
             final long batchTS,
@@ -154,10 +154,10 @@ public class ProfileSampleValue
             final int scopeProfileSequenceNum,
             final ScopeProfiles scopeProfile,
             final int profileSequenceNum,
-            final ProfileContainer container,
             final Profile otelProfile,
             final int sampleSequenceNum,
-            final int valueSequenceNum
+            final int valueSequenceNum,
+            final ProfilesDictionary lookup
             ) {
         this.batchTimestamp = batchTS;
         this.batchUUID = batchID;
@@ -168,12 +168,12 @@ public class ProfileSampleValue
         this.scope = scopeProfile.getScope();
         this.profileSchemaUrl = scopeProfile.getSchemaUrl();
         this.profileSeqNo = profileSequenceNum;
-        this.profileContainer = container;
         this.profile = otelProfile;
         this.sampleSeqNo = sampleSequenceNum;
         this.sample = profile.getSample(sampleSequenceNum);
         this.valueSeqNo = valueSequenceNum;
         this.value = this.sample.getValue(valueSequenceNum);
+        this.dictionary = lookup;
 
         // FIXME: add checks for validity and set isValid, errorMessage?
         isValid = true;
@@ -284,15 +284,6 @@ public class ProfileSampleValue
     }
 
     /**
-     * Get the OTLP Profile Container.
-     *
-     * @return the profile container
-     */
-    public ProfileContainer getProfileContainer() {
-        return profileContainer;
-    }
-
-    /**
      * Get the OTLP Profile.
      *
      * @return the profile
@@ -335,5 +326,14 @@ public class ProfileSampleValue
      */
     public String getErrorMessage() {
         return errorMessage;
+    }
+
+    /**
+     * Get the OTLP profiles dictionary.
+     *
+     * @return the profile
+     */
+    public ProfilesDictionary getDictionary() {
+        return dictionary;
     }
 }
