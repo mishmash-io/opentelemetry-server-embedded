@@ -18,7 +18,7 @@ WORKDIR /tmp/maven-deps
 RUN --mount=type=bind,source=.,target=/tmp/maven-deps,rw,Z cd /tmp/maven-deps && \
     mvn -DskipTests clean install
 
-FROM apache/druid:30.0.1
+FROM apache/druid:34.0.0
 
 WORKDIR /opt/druid
 RUN mkdir /opt/druid/.m2
