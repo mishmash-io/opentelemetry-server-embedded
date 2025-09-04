@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:21-jre-alpine
 ADD ./target/dependency /opt/server-parquet
 COPY target/server-parquet-*.jar /opt/server-parquet
 RUN mkdir -p /parquet
