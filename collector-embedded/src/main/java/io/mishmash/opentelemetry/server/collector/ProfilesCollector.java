@@ -21,14 +21,14 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import io.grpc.MethodDescriptor;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
-import io.opentelemetry.proto.collector.profiles.v1experimental.ExportProfilesPartialSuccess;
-import io.opentelemetry.proto.collector.profiles.v1experimental.ExportProfilesServiceRequest;
-import io.opentelemetry.proto.collector.profiles.v1experimental.ExportProfilesServiceResponse;
+import io.opentelemetry.proto.collector.profiles.v1development.ExportProfilesPartialSuccess;
+import io.opentelemetry.proto.collector.profiles.v1development.ExportProfilesServiceRequest;
+import io.opentelemetry.proto.collector.profiles.v1development.ExportProfilesServiceResponse;
 import io.vertx.core.Vertx;
+import io.vertx.grpc.common.ServiceMethod;
 
 /**
  * Processes incoming OpenTelemetry profiles packets - extracts individual
@@ -56,11 +56,11 @@ public class ProfilesCollector
      * @param otel a helper for own telemetry needs
      */
     public ProfilesCollector(
-            final MethodDescriptor<
+            final ServiceMethod<
                 ExportProfilesServiceRequest,
                 ExportProfilesServiceResponse> exportMethod,
             final Instrumentation otel) {
-        super("/v1experimental/profiles", exportMethod, otel,
+        super("/v1development/profiles", exportMethod, otel,
                 ExportProfilesServiceRequest::parser,
                 ExportProfilesServiceRequest::newBuilder,
                 ExportProfilesServiceResponse::parser,

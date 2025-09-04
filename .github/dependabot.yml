@@ -5,6 +5,8 @@ updates:
     schedule:
       interval: "daily"
   - package-ecosystem: "docker"
-    directory: "/server-parquet"
+    directories:
+      - "/server-parquet"
+      - "/druid-otlp-format"
     schedule:
       interval: "daily"

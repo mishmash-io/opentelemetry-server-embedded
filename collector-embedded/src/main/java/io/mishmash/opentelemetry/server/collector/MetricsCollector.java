@@ -23,7 +23,6 @@ import java.util.concurrent.Flow.Subscriber;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import io.grpc.MethodDescriptor;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
@@ -31,6 +30,7 @@ import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsPartialSuccess;
 import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceRequest;
 import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceResponse;
 import io.vertx.core.Vertx;
+import io.vertx.grpc.common.ServiceMethod;
 
 /**
  * Processes incoming OpenTelemetry metrics packets - extracts all
@@ -59,7 +59,7 @@ public class MetricsCollector
      * @param otel a helper for own telemetry needs
      */
     public MetricsCollector(
-            final MethodDescriptor<
+            final ServiceMethod<
                 ExportMetricsServiceRequest,
                 ExportMetricsServiceResponse> exportMethod,
             final Instrumentation otel) {

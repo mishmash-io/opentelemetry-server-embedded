@@ -17,6 +17,7 @@
 
 package io.mishmash.opentelemetry.server.parquet;
 
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,16 +26,26 @@ import io.mishmash.opentelemetry.server.collector.MetricsCollector;
 import io.mishmash.opentelemetry.server.collector.ProfilesCollector;
 import io.mishmash.opentelemetry.server.collector.TracesCollector;
 import io.mishmash.opentelemetry.server.collector.Instrumentation;
+import io.opentelemetry.proto.collector.logs.v1.ExportLogsServiceRequest;
 import io.opentelemetry.proto.collector.logs.v1.LogsServiceGrpc;
+import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceRequest;
 import io.opentelemetry.proto.collector.metrics.v1.MetricsServiceGrpc;
-import io.opentelemetry.proto.collector.profiles.v1experimental.ProfilesServiceGrpc;
+import io.opentelemetry.proto.collector.profiles.v1development.ExportProfilesServiceRequest;
+import io.opentelemetry.proto.collector.profiles.v1development.ProfilesServiceGrpc;
+import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest;
 import io.opentelemetry.proto.collector.trace.v1.TraceServiceGrpc;
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Launcher;
+import io.vertx.core.Deployable;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.ext.web.AllowForwardHeaders;
 import io.vertx.ext.web.Router;
+import io.vertx.grpc.common.GrpcMessageDecoder;
+import io.vertx.grpc.common.GrpcMessageEncoder;
+import io.vertx.grpc.common.ServiceMethod;
+import io.vertx.grpc.common.ServiceName;
 import io.vertx.grpc.server.GrpcServer;
+import io.vertx.launcher.application.VertxApplication;
+import io.vertx.launcher.application.VertxApplicationHooks;
 
 /**
  * Main class that launches the OpenTelemetry server and
@@ -67,22 +78,54 @@ public class CollectorsMain extends AbstractVerticle {
      * The OpenTelemetry logs collector.
      */
     private LogsCollector logsCollector =
-            new LogsCollector(LogsServiceGrpc.getExportMethod(), otel);
+            new LogsCollector(
+                    ServiceMethod.server(
+                            ServiceName.create(LogsServiceGrpc.SERVICE_NAME),
+                            "Export",
+                            GrpcMessageEncoder.encoder(),
+                            GrpcMessageDecoder.decoder(
+                                    ExportLogsServiceRequest.newBuilder())),
+                    otel);
+
     /**
      * The OpenTelemetry metrics collector.
      */
     private MetricsCollector metricsCollector =
-            new MetricsCollector(MetricsServiceGrpc.getExportMethod(), otel);
+            new MetricsCollector(
+                    ServiceMethod.server(
+                            ServiceName.create(MetricsServiceGrpc.SERVICE_NAME),
+                            "Export",
+                            GrpcMessageEncoder.encoder(),
+                            GrpcMessageDecoder.decoder(
+                                    ExportMetricsServiceRequest.newBuilder())),
+                    otel);
+
     /**
      * The OpenTelemetry traces collector.
      */
     private TracesCollector tracesCollector =
-            new TracesCollector(TraceServiceGrpc.getExportMethod(), otel);
+            new TracesCollector(
+                    ServiceMethod.server(
+                            ServiceName.create(TraceServiceGrpc.SERVICE_NAME),
+                            "Export",
+                            GrpcMessageEncoder.encoder(),
+                            GrpcMessageDecoder.decoder(
+                                    ExportTraceServiceRequest.newBuilder())),
+                    otel);
     /**
      * The OpenTelemetry profiles collector.
      */
     private ProfilesCollector profilesCollector =
-            new ProfilesCollector(ProfilesServiceGrpc.getExportMethod(), otel);
+            new ProfilesCollector(
+                    ServiceMethod.server(
+                            ServiceName
+                                .create(ProfilesServiceGrpc.SERVICE_NAME),
+                            "Export",
+                            GrpcMessageEncoder.encoder(),
+                            GrpcMessageDecoder.decoder(
+                                    ExportProfilesServiceRequest
+                                        .newBuilder())),
+                    otel);
 
     /**
      * Stops all OpenTelemetry collectors and closes them.
@@ -144,7 +187,7 @@ public class CollectorsMain extends AbstractVerticle {
                     + "traces"
                     + "-" + currentTimestamp;
             String profilesPrefix = basePath
-                    + "profiles-experimental"
+                    + "profiles-development"
                     + "-" + currentTimestamp;
 
             FileLogs persistentLogs =
@@ -239,6 +282,15 @@ public class CollectorsMain extends AbstractVerticle {
      * @throws Exception if an error occurs
      */
     public static void main(final String[] args) throws Exception {
-        Launcher.executeCommand("run", CollectorsMain.class.getName());
+        VertxApplication app = new VertxApplication(
+                args,
+                new VertxApplicationHooks() {
+                    @Override
+                    public Supplier<? extends Deployable> verticleSupplier() {
+                        return CollectorsMain::new;
+                    }
+                });
+
+        app.launch();
     }
 }
