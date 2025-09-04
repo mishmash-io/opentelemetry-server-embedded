@@ -40,6 +40,7 @@ message PersistedProfile {
   // The following are extracted from opentelemetry.proto.resource.v1.Resource if it is present
   repeated .opentelemetry.proto.common.v1.KeyValue resource_attributes = 4;
   uint32 resource_dropped_attributes_count = 5;
+  repeated .opentelemetry.proto.common.v1.EntityRef resource_entity_refs = 43;
 
   // The Schema URL, if known. This is the identifier of the Schema that the resource data
   // is recorded in. To learn more about Schema URL see

@@ -172,7 +172,7 @@ public class ProfileSampleValue
         this.sampleSeqNo = sampleSequenceNum;
         this.sample = profile.getSample(sampleSequenceNum);
         this.valueSeqNo = valueSequenceNum;
-        this.value = this.sample.getValue(valueSequenceNum);
+        this.value = this.sample.getValues(valueSequenceNum);
         this.dictionary = lookup;
 
         // FIXME: add checks for validity and set isValid, errorMessage?
