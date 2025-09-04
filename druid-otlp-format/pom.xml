@@ -113,6 +113,13 @@
       <artifactId>druid-processing</artifactId>
       <version>${druid.version}</version>
       <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <!-- exclude netty, it's quite old and provided anyway -->
+          <groupId>io.netty</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
   </dependencies>
 
