@@ -260,7 +260,7 @@ public class ProfilesFlattener implements Iterable<ProfileSampleValue> {
                 while (currentSample != null
                         && !(
                                 valueIt = currentSample
-                                            .getValueList()
+                                            .getValuesList()
                                             .iterator()
                             ).hasNext()) {
                     nextSample();

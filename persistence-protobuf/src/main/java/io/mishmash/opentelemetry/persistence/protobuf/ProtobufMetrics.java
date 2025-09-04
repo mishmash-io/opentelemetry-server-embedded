@@ -25,6 +25,7 @@ import io.opentelemetry.proto.metrics.v1.ExponentialHistogramDataPoint;
 import io.opentelemetry.proto.metrics.v1.HistogramDataPoint;
 import io.opentelemetry.proto.metrics.v1.NumberDataPoint;
 import io.opentelemetry.proto.metrics.v1.SummaryDataPoint;
+import io.opentelemetry.proto.resource.v1.Resource;
 
 /**
  * Utility class to help with protobuf serialization of
@@ -57,12 +58,13 @@ public final class ProtobufMetrics {
         }
 
         if (metric.getResource() != null) {
+            Resource r = metric.getResource();
+
             builder = builder
-                    .addAllResourceAttributes(
-                            metric.getResource().getAttributesList())
+                    .addAllResourceAttributes(r.getAttributesList())
                     .setResourceDroppedAttributesCount(
-                            metric.getResource()
-                                .getDroppedAttributesCount());
+                            r.getDroppedAttributesCount())
+                    .addAllResourceEntityRefs(r.getEntityRefsList());
         }
 
         if (metric.getResourceSchemaUrl() != null) {

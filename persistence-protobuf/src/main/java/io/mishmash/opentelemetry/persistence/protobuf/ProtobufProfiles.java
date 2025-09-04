@@ -17,8 +17,6 @@
 
 package io.mishmash.opentelemetry.persistence.protobuf;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -30,9 +28,8 @@ import io.mishmash.opentelemetry.persistence.proto.v1.ProfilesPersistenceProto.S
 import io.mishmash.opentelemetry.persistence.proto.v1.ProfilesPersistenceProto.StrMapping;
 import io.mishmash.opentelemetry.persistence.proto.v1.ProfilesPersistenceProto.StrValueType;
 import io.mishmash.opentelemetry.server.collector.ProfileSampleValue;
-import io.opentelemetry.proto.common.v1.KeyValue;
-import io.opentelemetry.proto.profiles.v1development.AttributeUnit;
 import io.opentelemetry.proto.profiles.v1development.Function;
+import io.opentelemetry.proto.profiles.v1development.KeyValueAndUnit;
 import io.opentelemetry.proto.profiles.v1development.Line;
 import io.opentelemetry.proto.profiles.v1development.Link;
 import io.opentelemetry.proto.profiles.v1development.Location;
@@ -41,6 +38,7 @@ import io.opentelemetry.proto.profiles.v1development.Profile;
 import io.opentelemetry.proto.profiles.v1development.ProfilesDictionary;
 import io.opentelemetry.proto.profiles.v1development.Sample;
 import io.opentelemetry.proto.profiles.v1development.ValueType;
+import io.opentelemetry.proto.resource.v1.Resource;
 
 /**
  * Utility class to help with protobuf serialization of
@@ -79,12 +77,13 @@ public final class ProtobufProfiles {
         }
 
         if (profile.getResource() != null) {
+            Resource r = profile.getResource();
+
             builder = builder
-                    .addAllResourceAttributes(
-                            profile.getResource().getAttributesList())
+                    .addAllResourceAttributes(r.getAttributesList())
                     .setResourceDroppedAttributesCount(
-                            profile.getResource()
-                                .getDroppedAttributesCount());
+                            r.getDroppedAttributesCount())
+                    .addAllResourceEntityRefs(r.getEntityRefsList());
         }
 
         if (profile.getResourceSchemaUrl() != null) {
@@ -122,18 +121,15 @@ public final class ProtobufProfiles {
                             p.getDroppedAttributesCount())
                     .setOriginalPayloadFormat(p.getOriginalPayloadFormat())
                     .setOriginalPayload(p.getOriginalPayload())
-                    .setTimeUnixNano(p.getTimeNanos())
-                    .setDurationNano(p.getDurationNanos())
+                    .setTimeUnixNano(p.getTimeUnixNano())
+                    .setDurationNano(p.getDurationNano())
                     .setPeriodType(toStr(dict, p.getPeriodType()))
                     .setPeriod(p.getPeriod())
                     .addAllComment(
                             toStrInt(
                                     dict,
                                     p.getCommentStrindicesList()))
-                    .setSampleType(
-                            toStr(dict,
-                                    p.getSampleType(
-                                            p.getDefaultSampleTypeIndex())));
+                    .setSampleType(toStr(dict, p.getSampleType()));
         }
 
         if (profile.getSample() != null) {
@@ -146,12 +142,7 @@ public final class ProtobufProfiles {
                                     dict,
                                     s.getAttributeIndicesList()))
                     .addAllTimestampsUnixNano(
-                            s.getTimestampsUnixNanoList())
-                    .setSampleType(
-                            toStr(
-                                dict,
-                                p.getSampleType(
-                                    profile.getValueSeqNo())));
+                            s.getTimestampsUnixNanoList());
 
             Link l = dict.getLinkTableCount() == 0
                     ? null
@@ -289,26 +280,11 @@ public final class ProtobufProfiles {
      */
     public static KeyValueUnit.Builder resolve(
             final ProfilesDictionary dictionary,
-            final KeyValue attr) {
-        String key = attr.getKey();
-        KeyValueUnit.Builder builder = KeyValueUnit.newBuilder()
-                .setKey(key)
-                .setValue(attr.getValue());
-
-        for (AttributeUnit u : dictionary.getAttributeUnitsList()) {
-            String unit = getStrAt(
-                            dictionary,
-                            u.getAttributeKeyStrindex());
-
-            if (key.equals(unit)) {
-                builder = builder
-                        .setUnit(unit);
-
-                break;
-            }
-        }
-
-        return builder;
+            final KeyValueAndUnit attr) {
+        return KeyValueUnit.newBuilder()
+                .setKey(dictionary.getStringTable(attr.getKeyStrindex()))
+                .setValue(attr.getValue())
+                .setUnit(dictionary.getStringTable(attr.getUnitStrindex()));
     }
 
     /**
@@ -323,26 +299,15 @@ public final class ProtobufProfiles {
             final ProfilesDictionary dictionary,
             final Sample s,
             final Profile p) {
-        if (s.getLocationsLength() > 0) {
-            ArrayList<StrLocation> res =
-                    new ArrayList<>((int) s.getLocationsLength());
+        List<Integer> indexes = dictionary
+                                    .getStackTable(s.getStackIndex())
+                                    .getLocationIndicesList();
 
-            int startIdx = (int) s.getLocationsStartIndex();
-            for (int idx = startIdx;
-                    idx < startIdx + (int) s.getLocationsLength();
-                    idx++) {
-                res.add(
-                        resolve(dictionary,
-                                dictionary.getLocationTable(
-                                        p.getLocationIndices(idx)))
-                            .build());
-            }
-
-            return res;
-        } else {
-            // couldn't extract locations?
-            return Collections.emptyList();
-        }
+        return indexes.stream()
+                    .map(i -> dictionary.getLocationTable(i))
+                    .map(l -> resolve(dictionary, l))
+                    .map(sl -> sl.build())
+                    .toList();
     }
 
     /**

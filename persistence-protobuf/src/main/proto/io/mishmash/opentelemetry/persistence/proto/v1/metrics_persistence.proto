@@ -25,6 +25,8 @@ option java_package = "io.mishmash.opentelemetry.persistence.proto.v1";
 option java_outer_classname = "MetricsPersistenceProto";
 
 message PersistedMetric {
+  reserved 49, 50;
+
   // OTLP messages are essentially collections of entries (logs, metrics or traces) and a batch is 
   // one such collection. For each of these 'batches' (or messages) a timestamp (batch_timestamp) 
   // is recorded - noting when it was received, and also an UUID is generated and written to batch_UUID.
@@ -37,6 +39,7 @@ message PersistedMetric {
   // The following are extracted from opentelemetry.proto.resource.v1.Resource if it is present
   repeated .opentelemetry.proto.common.v1.KeyValue resource_attributes = 4;
   uint32 resource_dropped_attributes_count = 5;
+  repeated .opentelemetry.proto.common.v1.EntityRef resource_entity_refs = 51;
 
   // The Schema URL, if known. This is the identifier of the Schema that the resource data
   // is recorded in. To learn more about Schema URL see
@@ -114,8 +117,6 @@ message PersistedMetric {
 
   // Additional metadata attributes that describe the metric, optional.
   repeated .opentelemetry.proto.common.v1.KeyValue metric_metadata = 48;
-
-  reserved 49, 50;
 
   // is_valid will be false if the system found this record to not comply with OTLP specs.
   bool is_valid = 100;

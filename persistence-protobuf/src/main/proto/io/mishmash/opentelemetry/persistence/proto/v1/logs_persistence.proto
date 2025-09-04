@@ -25,6 +25,8 @@ option java_package = "io.mishmash.opentelemetry.persistence.proto.v1";
 option java_outer_classname = "LogsPersistenceProto";
 
 message PersistedLog {
+  reserved 29, 30;
+
   // OTLP messages are essentially collections of entries (logs, metrics or traces) and a batch is 
   // one such collection. For each of these 'batches' (or messages) a timestamp (batch_timestamp) 
   // is recorded - noting when it was received, and also an UUID is generated and written to batch_UUID.
@@ -37,6 +39,7 @@ message PersistedLog {
   // The following are extracted from opentelemetry.proto.resource.v1.Resource if it is present
   repeated .opentelemetry.proto.common.v1.KeyValue resource_attributes = 4;
   uint32 resource_dropped_attributes_count = 5;
+  repeated .opentelemetry.proto.common.v1.EntityRef resource_entity_refs = 32;
 
   // The Schema URL, if known. This is the identifier of the Schema that the resource data
   // is recorded in. To learn more about Schema URL see
@@ -73,13 +76,12 @@ message PersistedLog {
   fixed32 flags = 25;
   bytes trace_id = 26;
   bytes span_id = 27;
+  string event_name = 31;
 
   // The Schema URL, if known. This is the identifier of the Schema that the log data
   // is recorded in. To learn more about Schema URL see
   // https://opentelemetry.io/docs/specs/otel/schemas/#schema-url
   string log_schema_url = 28;
-
-  reserved 29, 30;
 
   // is_valid will be false if the system found this record to not comply with OTLP specs.
   bool is_valid = 100;

@@ -22,6 +22,8 @@ import java.util.Map;
 import io.mishmash.opentelemetry.persistence.proto.v1.LogsPersistenceProto.PersistedLog;
 import io.mishmash.opentelemetry.server.collector.Log;
 import io.opentelemetry.proto.common.v1.AnyValue;
+import io.opentelemetry.proto.logs.v1.LogRecord;
+import io.opentelemetry.proto.resource.v1.Resource;
 
 /**
  * Utility class to help with protobuf serialization of {@link Log} instances.
@@ -50,11 +52,13 @@ public final class ProtobufLogs {
         }
 
         if (log.getResource() != null) {
+            Resource r = log.getResource();
+
             builder = builder
-                .addAllResourceAttributes(
-                        log.getResource().getAttributesList())
+                .addAllResourceAttributes(r.getAttributesList())
                 .setResourceDroppedAttributesCount(
-                        log.getResource().getDroppedAttributesCount());
+                        r.getDroppedAttributesCount())
+                .addAllResourceEntityRefs(r.getEntityRefsList());
         }
 
         if (log.getResourceSchemaUrl() != null) {
@@ -73,20 +77,23 @@ public final class ProtobufLogs {
         }
 
         if (log.getLog() != null) {
-            builder = builder
-                .setTimeUnixNano(log.getLog().getTimeUnixNano())
-                .setObservedTimeUnixNano(
-                        log.getLog().getObservedTimeUnixNano())
-                .setSeverityNumber(log.getLog().getSeverityNumber())
-                .setSeverityText(log.getLog().getSeverityText())
-                .addAllAttributes(log.getLog().getAttributesList())
-                .setDroppedAttributesCount(
-                        log.getLog().getDroppedAttributesCount())
-                .setFlags(log.getLog().getFlags())
-                .setTraceId(log.getLog().getTraceId())
-                .setSpanId(log.getLog().getSpanId());
+            LogRecord r = log.getLog();
 
-            AnyValue body = log.getLog().getBody();
+            builder = builder
+                .setTimeUnixNano(r.getTimeUnixNano())
+                .setObservedTimeUnixNano(
+                        r.getObservedTimeUnixNano())
+                .setSeverityNumber(r.getSeverityNumber())
+                .setSeverityText(r.getSeverityText())
+                .addAllAttributes(r.getAttributesList())
+                .setDroppedAttributesCount(
+                        r.getDroppedAttributesCount())
+                .setFlags(r.getFlags())
+                .setTraceId(r.getTraceId())
+                .setSpanId(r.getSpanId())
+                .setEventName(r.getEventName());
+
+            AnyValue body = r.getBody();
 
             builder = builder.setBodyType(body.getValueCase().name());
 
