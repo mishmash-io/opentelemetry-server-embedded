@@ -69,7 +69,7 @@
   </developers>
 
   <properties>
-    <protobuf.version>4.32.1</protobuf.version>
+    <protobuf.version>4.33.0</protobuf.version>
     <vertx.version>5.0.4</vertx.version>
     <opentelemetry.version>1.55.0</opentelemetry.version>
     <opentelemetry.proto.version>1.8.0-alpha</opentelemetry.proto.version>
