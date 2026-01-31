@@ -18,6 +18,7 @@
 package io.mishmash.opentelemetry.server.collector;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.UUID;
 
 import io.opentelemetry.context.Context;
@@ -195,7 +196,7 @@ public class ProfilesFlattener implements Iterable<ProfileSampleValue> {
         /**
          * Iterator over the values of an OTLP Sample.
          */
-        private Iterator<Long> valueIt;
+        private Iterator<SampleValue> valueIt;
         /**
          * The current OTLP Resource Profile.
          */
@@ -259,9 +260,7 @@ public class ProfilesFlattener implements Iterable<ProfileSampleValue> {
 
                 while (currentSample != null
                         && !(
-                                valueIt = currentSample
-                                            .getValuesList()
-                                            .iterator()
+                                valueIt = new SamplesIterator(currentSample)
                             ).hasNext()) {
                     nextSample();
                 }
@@ -275,7 +274,7 @@ public class ProfilesFlattener implements Iterable<ProfileSampleValue> {
          */
         @Override
         public ProfileSampleValue next() {
-            Long rec = valueIt.next();
+            SampleValue rec = valueIt.next();
             ProfileSampleValue psv =
                     new ProfileSampleValue(batch, otel, user);
 
@@ -396,6 +395,75 @@ public class ProfilesFlattener implements Iterable<ProfileSampleValue> {
             } else {
                 currentResource = null;
             }
+        }
+    }
+
+    /**
+     * A value/timestamp pair (either is optional and can be null).
+     *
+     * @param timestamp An optional timestamp when the observation was made
+     * @param value An optional value associated with this profiling sample
+     */
+    private record SampleValue(Long timestamp, Long value) { }
+
+    /**
+     * Helper iterator to simplify iterating over optional values or
+     * timestamps.
+     *
+     * According to the OTLP protocol if both lists are preset they should
+     * be of equal size.
+     */
+    private final class SamplesIterator implements Iterator<SampleValue> {
+
+        /**
+         * The list of values to iterate over (or empty).
+         */
+        private List<Long> values;
+        /**
+         * The list of timestamps to iterate over (or empty).
+         */
+        private List<Long> timestamps;
+        /**
+         * Current index in the lists.
+         */
+        private int currentIdx;
+
+        private SamplesIterator(final Sample profileSample) {
+            this.values = profileSample.getValuesList();
+            this.timestamps = profileSample.getTimestampsUnixNanoList();
+            this.currentIdx = 0;
+
+            if (!values.isEmpty() && !timestamps.isEmpty()) {
+                if (values.size() != timestamps.size()) {
+                    throw new IndexOutOfBoundsException(
+                            """
+                            OTLP Profiles Samples must contain an equal \
+                            number of values and timestamps""");
+                }
+            }
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public boolean hasNext() {
+            return currentIdx < values.size()
+                    || currentIdx < timestamps.size();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public SampleValue next() {
+            SampleValue r = new SampleValue(
+                    timestamps.isEmpty() ? null : timestamps.get(currentIdx),
+                    values.isEmpty() ? null : values.get(currentIdx));
+
+            currentIdx++;
+
+            return r;
         }
     }
 }

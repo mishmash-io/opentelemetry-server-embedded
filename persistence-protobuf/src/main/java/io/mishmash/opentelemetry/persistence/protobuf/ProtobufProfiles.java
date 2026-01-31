@@ -136,9 +136,13 @@ public final class ProtobufProfiles {
                     .addAllAttributes(
                             resolveAttributes(
                                     dict,
-                                    s.getAttributeIndicesList()))
-                    .addAllTimestampsUnixNano(
-                            s.getTimestampsUnixNanoList());
+                                    s.getAttributeIndicesList()));
+
+            if (profile.getObservationTimestamp() != null) {
+                builder = builder
+                        .setTimestampUnixNano(
+                                profile.getObservationTimestamp());
+            }
 
             Link l = dict.getLinkTableCount() == 0
                     ? null
@@ -150,7 +154,9 @@ public final class ProtobufProfiles {
             }
         }
 
-        builder = builder.setValue(profile.getValue());
+        if (profile.getValue() != null) {
+            builder = builder.setValue(profile.getValue());
+        }
 
         return builder;
     }

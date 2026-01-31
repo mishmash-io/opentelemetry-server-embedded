@@ -25,7 +25,7 @@ option java_package = "io.mishmash.opentelemetry.persistence.proto.v1";
 option java_outer_classname = "ProfilesPersistenceProto";
 
 message PersistedProfile {
-  reserved 15, 16, 17, 21, 22, 27, 28, 30, 32, 40, 41;
+  reserved 15, 16, 17, 21, 22, 27, 28, 30, 32, 34, 40, 41;
 
   // OTLP messages are essentially collections of entries (logs, metrics, etc) and a batch is 
   // one such collection. For each of these 'batches' (or messages) a timestamp (batch_timestamp) 
@@ -91,7 +91,8 @@ message PersistedProfile {
   repeated StrLocation stack = 31;
   // removed: repeated StrLabel labels = 32;
   repeated KeyValueUnit attributes = 33;
-  repeated uint64 timestamps_unix_nano = 34;
+  // fixed below (should be a single field) repeated uint64 timestamps_unix_nano = 34;
+  uint64 timestamp_unix_nano = 44;
 
   // The following are extracted from the Sample link field.
   bytes trace_id = 35;
@@ -100,7 +101,8 @@ message PersistedProfile {
   // The sequence number of a value of the given Sample.
   int32 value_seq_no = 37;
 
-  // the value itself
+  // the value itself. A value can be missing. A timestamp_unix_nano can be
+  // present instead. Having both a value and a timestamp_unix_nano is also allowed.
   int64 value = 38;
 
   // the value type (comes from opentelemetry.proto.profiles.v1development.Profile)
