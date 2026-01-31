@@ -117,7 +117,7 @@ public abstract class AbstractCollector<
     /**
      * Default size of a subscriber queue.
      */
-    public static final int DEFAULT_SUBSCRIBER_QUEUE_SIZE = 4096;
+    public static final int DEFAULT_SUBSCRIBER_QUEUE_SIZE = 8192;
 
     /**
      * Routing context parameter key for 'isJson'.
