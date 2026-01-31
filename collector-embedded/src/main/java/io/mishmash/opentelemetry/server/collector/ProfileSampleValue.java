@@ -170,7 +170,7 @@ public class ProfileSampleValue
         this.profileSeqNo = profileSequenceNum;
         this.profile = otelProfile;
         this.sampleSeqNo = sampleSequenceNum;
-        this.sample = profile.getSample(sampleSequenceNum);
+        this.sample = profile.getSamples(sampleSequenceNum);
         this.valueSeqNo = valueSequenceNum;
         this.value = this.sample.getValues(valueSequenceNum);
         this.dictionary = lookup;

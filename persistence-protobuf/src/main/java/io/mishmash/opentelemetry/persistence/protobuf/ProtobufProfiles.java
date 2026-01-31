@@ -125,10 +125,6 @@ public final class ProtobufProfiles {
                     .setDurationNano(p.getDurationNano())
                     .setPeriodType(toStr(dict, p.getPeriodType()))
                     .setPeriod(p.getPeriod())
-                    .addAllComment(
-                            toStrInt(
-                                    dict,
-                                    p.getCommentStrindicesList()))
                     .setSampleType(toStr(dict, p.getSampleType()));
         }
 
@@ -184,8 +180,7 @@ public final class ProtobufProfiles {
             final ValueType vt) {
         return StrValueType.newBuilder()
                 .setType(getStrAt(dictionary, vt.getTypeStrindex()))
-                .setUnit(getStrAt(dictionary, vt.getUnitStrindex()))
-                .setAggregationTemporality(vt.getAggregationTemporality());
+                .setUnit(getStrAt(dictionary, vt.getUnitStrindex()));
     }
 
     /**
@@ -264,7 +259,7 @@ public final class ProtobufProfiles {
                             dictionary.getMappingTable(
                                     (int) location.getMappingIndex())))
                 .setAddress(location.getAddress())
-                .addAllLines(resolveLines(dictionary, location.getLineList()))
+                .addAllLines(resolveLines(dictionary, location.getLinesList()))
                 .addAllAttributes(
                         resolveAttributes(
                                 dictionary,

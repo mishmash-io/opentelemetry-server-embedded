@@ -307,7 +307,7 @@ public class ProfilesFlattener implements Iterable<ProfileSampleValue> {
                 while (currentProfile != null
                         && !(
                                 sampleIt = currentProfile
-                                        .getSampleList()
+                                        .getSamplesList()
                                         .iterator()
                             ).hasNext()) {
                     nextProfile();
