@@ -154,6 +154,12 @@ public class Batch<T> {
             Span.current().addEvent("batch loaded");
 
             loadedFuture.complete(null);
+
+            if (elements.isEmpty()) {
+                Span.current().addEvent("empty batch processed");
+
+                processedFuture.complete(null);
+            }
         }
     }
 
