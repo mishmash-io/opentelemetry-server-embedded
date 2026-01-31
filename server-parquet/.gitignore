@@ -1,3 +1,4 @@
 *.parquet
 *.parquet.staging
-*.parquet.crc
+.*.parquet.crc
+.*.parquet.staging.crc

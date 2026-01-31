@@ -125,10 +125,6 @@ public final class ProtobufProfiles {
                     .setDurationNano(p.getDurationNano())
                     .setPeriodType(toStr(dict, p.getPeriodType()))
                     .setPeriod(p.getPeriod())
-                    .addAllComment(
-                            toStrInt(
-                                    dict,
-                                    p.getCommentStrindicesList()))
                     .setSampleType(toStr(dict, p.getSampleType()));
         }
 
@@ -140,9 +136,13 @@ public final class ProtobufProfiles {
                     .addAllAttributes(
                             resolveAttributes(
                                     dict,
-                                    s.getAttributeIndicesList()))
-                    .addAllTimestampsUnixNano(
-                            s.getTimestampsUnixNanoList());
+                                    s.getAttributeIndicesList()));
+
+            if (profile.getObservationTimestamp() != null) {
+                builder = builder
+                        .setTimestampUnixNano(
+                                profile.getObservationTimestamp());
+            }
 
             Link l = dict.getLinkTableCount() == 0
                     ? null
@@ -154,7 +154,9 @@ public final class ProtobufProfiles {
             }
         }
 
-        builder = builder.setValue(profile.getValue());
+        if (profile.getValue() != null) {
+            builder = builder.setValue(profile.getValue());
+        }
 
         return builder;
     }
@@ -184,8 +186,7 @@ public final class ProtobufProfiles {
             final ValueType vt) {
         return StrValueType.newBuilder()
                 .setType(getStrAt(dictionary, vt.getTypeStrindex()))
-                .setUnit(getStrAt(dictionary, vt.getUnitStrindex()))
-                .setAggregationTemporality(vt.getAggregationTemporality());
+                .setUnit(getStrAt(dictionary, vt.getUnitStrindex()));
     }
 
     /**
@@ -264,7 +265,7 @@ public final class ProtobufProfiles {
                             dictionary.getMappingTable(
                                     (int) location.getMappingIndex())))
                 .setAddress(location.getAddress())
-                .addAllLines(resolveLines(dictionary, location.getLineList()))
+                .addAllLines(resolveLines(dictionary, location.getLinesList()))
                 .addAllAttributes(
                         resolveAttributes(
                                 dictionary,

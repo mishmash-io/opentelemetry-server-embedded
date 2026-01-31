@@ -96,10 +96,6 @@ public class ProfileSampleValue
      * Sample Location (zero-based).
      */
     private int valueSeqNo;
-    /**
-     * The value for the given sample type and location.
-     */
-    private long value;
 
     /**
      * If this record is valid.
@@ -170,9 +166,8 @@ public class ProfileSampleValue
         this.profileSeqNo = profileSequenceNum;
         this.profile = otelProfile;
         this.sampleSeqNo = sampleSequenceNum;
-        this.sample = profile.getSample(sampleSequenceNum);
+        this.sample = profile.getSamples(sampleSequenceNum);
         this.valueSeqNo = valueSequenceNum;
-        this.value = this.sample.getValues(valueSequenceNum);
         this.dictionary = lookup;
 
         // FIXME: add checks for validity and set isValid, errorMessage?
@@ -304,10 +299,23 @@ public class ProfileSampleValue
     /**
      * Get the value of this record.
      *
-     * @return the value
+     * @return the value, if present
      */
-    public long getValue() {
-        return value;
+    public Long getValue() {
+        return sample.getValuesCount() > 0
+                ? sample.getValues(valueSeqNo)
+                : null;
+    }
+
+    /**
+     * Get the observation timestamp of this value.
+     *
+     * @return the timestamp, if present
+     */
+    public Long getObservationTimestamp() {
+        return sample.getTimestampsUnixNanoCount() > 0
+                ? sample.getTimestampsUnixNano(valueSeqNo)
+                : null;
     }
 
     /**
