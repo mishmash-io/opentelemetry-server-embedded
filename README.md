@@ -175,6 +175,8 @@ To get you started, we're publishing [data sources and visualizations](./superse
   
 # OpenTelemetry at mishmash io
 
+![Discord](https://img.shields.io/discord/1208043287001169990)
+
 OpenTelemetry's main intent is the observability of production environments, but at [mishmash io](https://mishmash.io) it is part of our software development process. By saving telemetry from  **experiments** and **tests** of 
 our own algorithms we ensure things like **performance** and **resource usage** of our distributed database, continuously and across releases.
 
