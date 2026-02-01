@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-FROM apache/superset:4.0.2
+FROM apache/superset:4.1.4
 
 RUN pip install pydruid
 COPY --chown=superset:superset --chmod=755 opentelemetry-demo.sh /app/
