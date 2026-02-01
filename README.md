@@ -1,5 +1,8 @@
 # OpenTelemetry and Apache Big Data, United by mishmash io
 
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/mishmash-io/opentelemetry-server-embedded/badge)](https://scorecard.dev/viewer/?uri=github.com/mishmash-io/opentelemetry-server-embedded)
+
+
 This repository contains code that receives and adapts [OpenTelemetry](https://opentelemetry.io/) signals - like `logs`, `metrics`, `traces` and `profiles` - to Open Source projects of the [Apache](https://www.apache.org/) analytics ecosystem.
 
 **Blend** and **bundle** them to build your own **Observability analytics backends:**
