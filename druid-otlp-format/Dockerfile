@@ -24,4 +24,4 @@ WORKDIR /opt/druid
 RUN mkdir /opt/druid/.m2
 RUN --mount=type=bind,from=builder,source=/root/.m2,target=/opt/druid/.m2 bin/run-java \
     -classpath "lib/*" org.apache.druid.cli.Main tools pull-deps \
-    --no-default-hadoop -c "io.mishmash.opentelemetry:druid-otlp-format:1.1.3"
+    --no-default-hadoop -c "io.mishmash.opentelemetry:druid-otlp-format:1.1.5"
