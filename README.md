@@ -175,7 +175,8 @@ To get you started, we're publishing [data sources and visualizations](./superse
   
 # OpenTelemetry at mishmash io
 
-[![GitHub followers](https://img.shields.io/github/followers/mishmash-io)](https://github.com/mishmash-io) [![Bluesky posts](https://img.shields.io/bluesky/posts/mishmash.io)](https://bsky.app/profile/mishmash.io) [![Discord](https://img.shields.io/discord/1208043287001169990)](https://discord.gg/JqC6VMZTgJ)
+[![GitHub followers](https://img.shields.io/github/followers/mishmash-io)](https://github.com/mishmash-io) [![Bluesky posts](https://img.shields.io/bluesky/posts/mishmash.io)](https://bsky.app/profile/mishmash.io) [![GitHub Discussions](https://img.shields.io/github/discussions/mishmash-io/about)
+](https://github.com/orgs/mishmash-io/discussions) [![Discord](https://img.shields.io/discord/1208043287001169990)](https://discord.gg/JqC6VMZTgJ)
 
 OpenTelemetry's main intent is the observability of production environments, but at [mishmash io](https://mishmash.io) it is part of our software development process. By saving telemetry from  **experiments** and **tests** of 
 our own algorithms we ensure things like **performance** and **resource usage** of our distributed database, continuously and across releases.
