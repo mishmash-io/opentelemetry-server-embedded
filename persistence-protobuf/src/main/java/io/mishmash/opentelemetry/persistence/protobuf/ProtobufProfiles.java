@@ -28,6 +28,8 @@ import io.mishmash.opentelemetry.persistence.proto.v1.ProfilesPersistenceProto.S
 import io.mishmash.opentelemetry.persistence.proto.v1.ProfilesPersistenceProto.StrMapping;
 import io.mishmash.opentelemetry.persistence.proto.v1.ProfilesPersistenceProto.StrValueType;
 import io.mishmash.opentelemetry.server.collector.ProfileSampleValue;
+import io.opentelemetry.proto.common.v1.EntityRef;
+import io.opentelemetry.proto.common.v1.KeyValue;
 import io.opentelemetry.proto.profiles.v1development.Function;
 import io.opentelemetry.proto.profiles.v1development.KeyValueAndUnit;
 import io.opentelemetry.proto.profiles.v1development.Line;
@@ -38,7 +40,6 @@ import io.opentelemetry.proto.profiles.v1development.Profile;
 import io.opentelemetry.proto.profiles.v1development.ProfilesDictionary;
 import io.opentelemetry.proto.profiles.v1development.Sample;
 import io.opentelemetry.proto.profiles.v1development.ValueType;
-import io.opentelemetry.proto.resource.v1.Resource;
 
 /**
  * Utility class to help with protobuf serialization of
@@ -76,14 +77,20 @@ public final class ProtobufProfiles {
                     .setErrorMessage(profile.getErrorMessage());
         }
 
-        if (profile.getResource() != null) {
-            Resource r = profile.getResource();
+        builder = builder.setResourceDroppedAttributesCount(
+                profile.getResourceDroppedAttributesCount());
 
+        Iterable<KeyValue> resourceAttributes =
+                profile.getResourceAttributes();
+        if (resourceAttributes != null) {
             builder = builder
-                    .addAllResourceAttributes(r.getAttributesList())
-                    .setResourceDroppedAttributesCount(
-                            r.getDroppedAttributesCount())
-                    .addAllResourceEntityRefs(r.getEntityRefsList());
+                    .addAllResourceAttributes(resourceAttributes);
+        }
+
+        Iterable<EntityRef> resourceEntities = profile.getResourceEntityRefs();
+        if (resourceEntities != null) {
+            builder = builder
+                    .addAllResourceEntityRefs(resourceEntities);
         }
 
         if (profile.getResourceSchemaUrl() != null) {

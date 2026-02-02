@@ -138,6 +138,12 @@ public class Base {
                 actual.getAttributesList());
     }
 
+    public void testResourceAttributes(Iterable<KeyValue> resourceAttributes) {
+        testAttributes(
+                resourceAttributes(),
+                resourceAttributes);
+    }
+
     public Iterable<KeyValue> resourceAttributes() {
         return attributes(
                 Collections.singleton(

@@ -22,8 +22,9 @@ import java.util.Map;
 import io.mishmash.opentelemetry.persistence.proto.v1.LogsPersistenceProto.PersistedLog;
 import io.mishmash.opentelemetry.server.collector.Log;
 import io.opentelemetry.proto.common.v1.AnyValue;
+import io.opentelemetry.proto.common.v1.EntityRef;
+import io.opentelemetry.proto.common.v1.KeyValue;
 import io.opentelemetry.proto.logs.v1.LogRecord;
-import io.opentelemetry.proto.resource.v1.Resource;
 
 /**
  * Utility class to help with protobuf serialization of {@link Log} instances.
@@ -51,14 +52,19 @@ public final class ProtobufLogs {
             builder = builder.setErrorMessage(log.getErrorMessage());
         }
 
-        if (log.getResource() != null) {
-            Resource r = log.getResource();
+        builder = builder.setResourceDroppedAttributesCount(
+                log.getResourceDroppedAttributesCount());
 
+        Iterable<KeyValue> resourceAttributes = log.getResourceAttributes();
+        if (resourceAttributes != null) {
             builder = builder
-                .addAllResourceAttributes(r.getAttributesList())
-                .setResourceDroppedAttributesCount(
-                        r.getDroppedAttributesCount())
-                .addAllResourceEntityRefs(r.getEntityRefsList());
+                    .addAllResourceAttributes(resourceAttributes);
+        }
+
+        Iterable<EntityRef> resourceEntities = log.getResourceEntityRefs();
+        if (resourceEntities != null) {
+            builder = builder
+                    .addAllResourceEntityRefs(resourceEntities);
         }
 
         if (log.getResourceSchemaUrl() != null) {

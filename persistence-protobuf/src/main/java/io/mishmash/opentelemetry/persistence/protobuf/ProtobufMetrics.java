@@ -21,11 +21,12 @@ import java.util.Map;
 
 import io.mishmash.opentelemetry.persistence.proto.v1.MetricsPersistenceProto.PersistedMetric;
 import io.mishmash.opentelemetry.server.collector.MetricDataPoint;
+import io.opentelemetry.proto.common.v1.EntityRef;
+import io.opentelemetry.proto.common.v1.KeyValue;
 import io.opentelemetry.proto.metrics.v1.ExponentialHistogramDataPoint;
 import io.opentelemetry.proto.metrics.v1.HistogramDataPoint;
 import io.opentelemetry.proto.metrics.v1.NumberDataPoint;
 import io.opentelemetry.proto.metrics.v1.SummaryDataPoint;
-import io.opentelemetry.proto.resource.v1.Resource;
 
 /**
  * Utility class to help with protobuf serialization of
@@ -57,14 +58,19 @@ public final class ProtobufMetrics {
                     .setErrorMessage(metric.getErrorMessage());
         }
 
-        if (metric.getResource() != null) {
-            Resource r = metric.getResource();
+        builder = builder.setResourceDroppedAttributesCount(
+                metric.getResourceDroppedAttributesCount());
 
+        Iterable<KeyValue> resourceAttributes = metric.getResourceAttributes();
+        if (resourceAttributes != null) {
             builder = builder
-                    .addAllResourceAttributes(r.getAttributesList())
-                    .setResourceDroppedAttributesCount(
-                            r.getDroppedAttributesCount())
-                    .addAllResourceEntityRefs(r.getEntityRefsList());
+                    .addAllResourceAttributes(resourceAttributes);
+        }
+
+        Iterable<EntityRef> resourceEntities = metric.getResourceEntityRefs();
+        if (resourceEntities != null) {
+            builder = builder
+                    .addAllResourceEntityRefs(resourceEntities);
         }
 
         if (metric.getResourceSchemaUrl() != null) {
