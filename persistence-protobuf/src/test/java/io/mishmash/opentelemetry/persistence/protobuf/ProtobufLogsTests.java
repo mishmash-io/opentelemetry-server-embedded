@@ -61,7 +61,8 @@ public class ProtobufLogsTests extends Base {
         testBatchUUID(pl.getBatchUUID());
         assertEquals(LOG_SEQ_NO, pl.getSeqNo());
         testResourceSchemaUrl(l.getResourceSchemaUrl());
-        testResource(l.getResource());
+        testResourceAttributes(l.getResourceAttributes());
+        // TODO: test resource entities
         assertEquals(LOG_SCHEMA_URL, l.getLogSchemaUrl());
         testScope(l.getScope());
         testLog(l.getLog());

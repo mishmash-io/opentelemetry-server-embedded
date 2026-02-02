@@ -18,7 +18,9 @@
 package io.mishmash.opentelemetry.server.collector;
 
 import io.opentelemetry.context.Context;
+import io.opentelemetry.proto.common.v1.EntityRef;
 import io.opentelemetry.proto.common.v1.InstrumentationScope;
+import io.opentelemetry.proto.common.v1.KeyValue;
 import io.opentelemetry.proto.profiles.v1development.Profile;
 import io.opentelemetry.proto.profiles.v1development.ProfilesDictionary;
 import io.opentelemetry.proto.profiles.v1development.ResourceProfiles;
@@ -32,7 +34,8 @@ import io.vertx.ext.auth.User;
  * of all subscribers that are expected to process it.
  */
 public class ProfileSampleValue
-        extends SubscribersBatch<ProfileSampleValue> {
+        extends SubscribersBatch<ProfileSampleValue>
+        implements SignalResource {
 
     /**
      * Timestamp when the client's OTLP packet was received (in ms).
@@ -243,12 +246,36 @@ public class ProfileSampleValue
     }
 
     /**
-     * Get the OpenTelemetry Resource of this profile.
+     * Get the OpenTelemetry Resource attributes of this profile sample.
      *
-     * @return the resource details
+     * If configured, additional attributes may be added. See the
+     * configuration options.
+     *
+     * @return the resource attributes
      */
-    public Resource getResource() {
-        return resource;
+    @Override
+    public Iterable<KeyValue> getResourceAttributes() {
+        return computeResourceAttributes(resource.getAttributesList());
+    }
+
+    /**
+     * Get the count of dropped OpenTelemetry Resource attributes.
+     *
+     * @return the number of attributes dropped
+     */
+    @Override
+    public int getResourceDroppedAttributesCount() {
+        return resource.getDroppedAttributesCount();
+    }
+
+    /**
+     * Get the OpenTelemetry Resource Entities of this profile sample.
+     *
+     * @return the resource entities.
+     */
+    @Override
+    public Iterable<EntityRef> getResourceEntityRefs() {
+        return resource.getEntityRefsList();
     }
 
     /**
@@ -256,6 +283,7 @@ public class ProfileSampleValue
      *
      * @return the schema URL
      */
+    @Override
     public String getResourceSchemaUrl() {
         return resourceSchemaUrl;
     }

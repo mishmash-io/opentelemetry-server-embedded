@@ -21,7 +21,8 @@ import java.util.Map;
 
 import io.mishmash.opentelemetry.persistence.proto.v1.TracesPersistenceProto.PersistedSpan;
 import io.mishmash.opentelemetry.server.collector.Span;
-import io.opentelemetry.proto.resource.v1.Resource;
+import io.opentelemetry.proto.common.v1.EntityRef;
+import io.opentelemetry.proto.common.v1.KeyValue;
 
 /**
  * Utility class to help with protobuf serialization of {@link Span}
@@ -50,14 +51,19 @@ public final class ProtobufSpans {
             builder = builder.setErrorMessage(span.getErrorMessage());
         }
 
-        if (span.getResource() != null) {
-            Resource r = span.getResource();
+        builder = builder.setResourceDroppedAttributesCount(
+                span.getResourceDroppedAttributesCount());
 
+        Iterable<KeyValue> resourceAttributes = span.getResourceAttributes();
+        if (resourceAttributes != null) {
             builder = builder
-                    .addAllResourceAttributes(r.getAttributesList())
-                    .setResourceDroppedAttributesCount(
-                            r.getDroppedAttributesCount())
-                    .addAllResourceEntityRefs(r.getEntityRefsList());
+                    .addAllResourceAttributes(resourceAttributes);
+        }
+
+        Iterable<EntityRef> resourceEntities = span.getResourceEntityRefs();
+        if (resourceEntities != null) {
+            builder = builder
+                    .addAllResourceEntityRefs(resourceEntities);
         }
 
         if (span.getResourceSchemaUrl() != null) {
