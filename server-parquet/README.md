@@ -105,6 +105,16 @@ export PARQUET_LOCATION="/new/location"
 
 If you don't set this environment variable files will be saved in the current working directory of the jvm.
 
+When your saved telemetry has grown you might want to have ways of organizing it into separate collections. To do that - you can configure your agents to emit resource
+attributes that will help you with data slicing (See the OpenTelemetry official docs for your agent). If you don't find an easy way to do that - you can also configure
+this Parquet server to add additinal, default values for the resource attributes that you need. In other words: if a given resource attribute is not emitted the Parquet
+server will add the default value you provided:
+
+```bash
+# Set this environment variable to a comma-separated string of key=value pairs
+export 'DEFAULT_RESOURCE_ATTRIBUTES=key1=asdf,key2=jkl,emptyKey='
+```
+
 Also, you can extend each parquet file with custom metadata by setting your own environment variables. Just prefix their names with `PARQUET_META_`, like this:
 
 ```bash
@@ -112,6 +122,8 @@ export PARQUET_META_my_variable="my_value"
 ```
 
 The above will add `my_variable=my_value` to the list of parquet extra file metadata fields. You can set a number of such variables and later use the saved metadata to identify related parquet files.
+
+***Note: *** Metadata in Parquet files applies to all records in that file.
 
 ## About the code
 
