@@ -19,7 +19,7 @@
 
   <groupId>io.mishmash.opentelemetry</groupId>
   <artifactId>opentelemetry-server-embedded</artifactId>
-  <version>1.1.6</version>
+  <version>1.1.6-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>OpenTelemetry Data Sources for Java</name>
@@ -209,6 +209,41 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
           <version>3.5.4</version>
+        </plugin>
+        <plugin>
+          <groupId>org.spdx</groupId>
+          <artifactId>spdx-maven-plugin</artifactId>
+          <version>1.0.3</version>
+          <executions>
+            <execution>
+              <id>create-sbom</id>
+              <goals>
+                <goal>createSPDX</goal>
+              </goals>
+            </execution>
+          </executions>
+          <configuration>
+            <defaultFileCopyright>Copyright (c) 2024, 2025, 2026 Mishmash IO UK Ltd.</defaultFileCopyright>
+            <defaultLicenseInformationInFile>Apache-2.0</defaultLicenseInformationInFile>
+            <defaultFileConcludedLicense>Apache-2.0</defaultFileConcludedLicense>
+            <defaultFileNotice>   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.</defaultFileNotice>
+            <licenseDeclared>Apache-2.0</licenseDeclared>
+            <licenseConcluded>(Apache-2.0 AND MIT AND LicenseRef-CyberNeko AND LGPL-2.1 AND BSD-3-Clause AND X11 AND MPL-1.0)</licenseConcluded>
+            <creators>
+              <creator>Organization: mishmash.io</creator>
+            </creators>
+            <originator>Organization: Linux Foundation</originator>
+          </configuration>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
