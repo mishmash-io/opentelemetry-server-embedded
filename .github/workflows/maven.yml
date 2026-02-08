@@ -55,7 +55,7 @@ jobs:
       attestations: write
       artifact-metadata: write
     needs: build
-    uses: ./.github/workflows/attestations.yml
+    uses: mishmash-io/opentelemetry-server-embedded/.github/workflows/attestations.yml@main
     with:
       artifact-path: collector-embedded/target/collector-embedded-1.1.6-SNAPSHOT.jar
       sbom-path: collector-embedded/target/site/*.spdx.json
@@ -66,7 +66,7 @@ jobs:
       attestations: write
       artifact-metadata: write
     needs: build
-    uses: ./.github/workflows/attestations.yml
+    uses: mishmash-io/opentelemetry-server-embedded/.github/workflows/attestations.yml@main
     with:
       artifact-path: druid-otlp-format/target/druid-otlp-format-1.1.6-SNAPSHOT.jar
       sbom-path: druid-otlp-format/target/site/*.spdx.json
@@ -77,7 +77,7 @@ jobs:
       attestations: write
       artifact-metadata: write
     needs: build
-    uses: ./.github/workflows/attestations.yml
+    uses: mishmash-io/opentelemetry-server-embedded/.github/workflows/attestations.yml@main
     with:
       artifact-path: persistence-protobuf/target/persistence-protobuf-1.1.6-SNAPSHOT.jar
       sbom-path: persistence-protobuf/target/site/*.spdx.json
@@ -88,7 +88,7 @@ jobs:
       attestations: write
       artifact-metadata: write
     needs: build
-    uses: ./.github/workflows/attestations.yml
+    uses: mishmash-io/opentelemetry-server-embedded/.github/workflows/attestations.yml@main
     with:
       artifact-path: server-parquet/target/server-parquet-1.1.6-SNAPSHOT.jar
       sbom-path: server-parquet/target/site/*.spdx.json
@@ -99,7 +99,7 @@ jobs:
       attestations: write
       artifact-metadata: write
     needs: build
-    uses: ./.github/workflows/attestations.yml
+    uses: mishmash-io/opentelemetry-server-embedded/.github/workflows/attestations.yml@main
     with:
       artifact-path: pom.xml
       sbom-path: target/site/*.spdx.json
