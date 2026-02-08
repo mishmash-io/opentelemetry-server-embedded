@@ -50,7 +50,7 @@ jobs:
     - name: Generate collector-embedded SBOM attestation
       uses: actions/attest-sbom@4651f806c01d8637787e274ac3bdf724ef169f34
       with:
-        subject-path: collector-embedded/target/collector-embedded-1.1.6-SNAPSHOT.jar
+        subject-path: collector-embedded/
         sbom-path: collector-embedded/target/site/io.mishmash.opentelemetry_collector-embedded-1.1.6-SNAPSHOT.spdx.json
         push-to-registry: true
     - name: Generate collector-embedded artifact attestation
