@@ -51,7 +51,7 @@ jobs:
       uses: actions/attest-sbom@4651f806c01d8637787e274ac3bdf724ef169f34
       with:
         subject-path: collector-embedded/target/collector-embedded-1.1.6-SNAPSHOT.jar
-        sbom-path: collector-embedded/target/site/*.spdx.json
+        sbom-path: collector-embedded/target/site/io.mishmash.opentelemetry_collector-embedded-1.1.6-SNAPSHOT.spdx.json
         push-to-registry: true
     - name: Generate collector-embedded artifact attestation
       uses: actions/attest-build-provenance@96278af6caaf10aea03fd8d33a09a777ca52d62f
@@ -62,7 +62,7 @@ jobs:
       uses: actions/attest-sbom@4651f806c01d8637787e274ac3bdf724ef169f34
       with:
         subject-path: druid-otlp-format/target/druid-otlp-format-1.1.6-SNAPSHOT.jar
-        sbom-path: druid-otlp-format/target/site/*.spdx.json
+        sbom-path: druid-otlp-format/target/site/io.mishmash.opentelemetry_druid-otlp-format-1.1.6-SNAPSHOT.spdx.json
         push-to-registry: true
     - name: Generate druid-otlp-format artifact attestation
       uses: actions/attest-build-provenance@96278af6caaf10aea03fd8d33a09a777ca52d62f
@@ -73,7 +73,7 @@ jobs:
       uses: actions/attest-sbom@4651f806c01d8637787e274ac3bdf724ef169f34
       with:
         subject-path: persistence-protobuf/target/persistence-protobuf-1.1.6-SNAPSHOT.jar
-        sbom-path: persistence-protobuf/target/site/*.spdx.json
+        sbom-path: persistence-protobuf/target/site/io.mishmash.opentelemetry_persistence-protobuf-1.1.6-SNAPSHOT.spdx.json
         push-to-registry: true
     - name: Generate persistence-protobuf artifact attestation
       uses: actions/attest-build-provenance@96278af6caaf10aea03fd8d33a09a777ca52d62f
@@ -84,7 +84,7 @@ jobs:
       uses: actions/attest-sbom@4651f806c01d8637787e274ac3bdf724ef169f34
       with:
         subject-path: server-parquet/target/server-parquet-1.1.6-SNAPSHOT.jar
-        sbom-path: server-parquet/target/site/*.spdx.json
+        sbom-path: server-parquet/target/site/io.mishmash.opentelemetry_server-parquet-1.1.6-SNAPSHOT.spdx.json
         push-to-registry: true
     - name: Generate server-parquet artifact attestation
       uses: actions/attest-build-provenance@96278af6caaf10aea03fd8d33a09a777ca52d62f
