@@ -56,51 +56,51 @@ jobs:
     - name: Generate collector-embedded artifact attestation
       uses: actions/attest-build-provenance@96278af6caaf10aea03fd8d33a09a777ca52d62f
       with:
-        subject-path: collector-embedded/target/collector-embedded-1.1.6-SNAPSHOT.jar
+        subject-path: collector-embedded/
         push-to-registry: true
     - name: Generate druid-otlp-format SBOM attestation
       uses: actions/attest-sbom@4651f806c01d8637787e274ac3bdf724ef169f34
       with:
-        subject-path: druid-otlp-format/target/druid-otlp-format-1.1.6-SNAPSHOT.jar
+        subject-path: druid-otlp-format/
         sbom-path: druid-otlp-format/target/site/io.mishmash.opentelemetry_druid-otlp-format-1.1.6-SNAPSHOT.spdx.json
         push-to-registry: true
     - name: Generate druid-otlp-format artifact attestation
       uses: actions/attest-build-provenance@96278af6caaf10aea03fd8d33a09a777ca52d62f
       with:
-        subject-path: druid-otlp-format/target/druid-otlp-format-1.1.6-SNAPSHOT.jar
+        subject-path: druid-otlp-format/
         push-to-registry: true
     - name: Generate persistence-protobuf SBOM attestation
       uses: actions/attest-sbom@4651f806c01d8637787e274ac3bdf724ef169f34
       with:
-        subject-path: persistence-protobuf/target/persistence-protobuf-1.1.6-SNAPSHOT.jar
+        subject-path: persistence-protobuf/
         sbom-path: persistence-protobuf/target/site/io.mishmash.opentelemetry_persistence-protobuf-1.1.6-SNAPSHOT.spdx.json
         push-to-registry: true
     - name: Generate persistence-protobuf artifact attestation
       uses: actions/attest-build-provenance@96278af6caaf10aea03fd8d33a09a777ca52d62f
       with:
-        subject-path: persistence-protobuf/target/persistence-protobuf-1.1.6-SNAPSHOT.jar
+        subject-path: persistence-protobuf/
         push-to-registry: true
     - name: Generate server-parquet SBOM attestation
       uses: actions/attest-sbom@4651f806c01d8637787e274ac3bdf724ef169f34
       with:
-        subject-path: server-parquet/target/server-parquet-1.1.6-SNAPSHOT.jar
+        subject-path: server-parquet/
         sbom-path: server-parquet/target/site/io.mishmash.opentelemetry_server-parquet-1.1.6-SNAPSHOT.spdx.json
         push-to-registry: true
     - name: Generate server-parquet artifact attestation
       uses: actions/attest-build-provenance@96278af6caaf10aea03fd8d33a09a777ca52d62f
       with:
-        subject-path: server-parquet/target/server-parquet-1.1.6-SNAPSHOT.jar
+        subject-path: server-parquet/
         push-to-registry: true
     - name: Generate pom SBOM attestation
       uses: actions/attest-sbom@4651f806c01d8637787e274ac3bdf724ef169f34
       with:
-        subject-path: pom.xml
-        sbom-path: target/site/*.spdx.json
+        subject-path: .
+        sbom-path: target/site/io.mishmash.opentelemetry_opentelemetry-server-embedded-1.1.6.spdx.json
         push-to-registry: true
     - name: Generate pom artifact attestation
       uses: actions/attest-build-provenance@96278af6caaf10aea03fd8d33a09a777ca52d62f
       with:
-        subject-path: pom.xml
+        subject-path: .
         push-to-registry: true
 
     # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
