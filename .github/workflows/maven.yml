@@ -22,6 +22,9 @@ jobs:
     # allow 'Update dependency graph' step below to submit the generated graph
     permissions:
       contents: write
+      id-token: write
+      attestations: write
+      artifact-metadata: write
 
     steps:
     - uses: actions/checkout@v4
@@ -36,12 +39,37 @@ jobs:
     - name: Build with Maven
       env:
         MAVEN_GPG_PASSPHRASE: ${{ secrets.MMIO_GPG_PASSPHRASE }}
-      run: mvn clean deploy --file pom.xml
+      run: mvn clean deploy spdx:createSPDX --file pom.xml
     - name: Archive deployables
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
         name: deployable-repo
         path: /tmp/maven-repo/
+    - name: collector-embedded attestations
+      uses: ./.github/workflows/attestations.yml
+      with:
+        artifact-path: collector-embedded/target/collector-embedded-1.1.6-SNAPSHOT.jar
+        sbom-path: collector-embedded/target/site/*.spdx.json
+    - name: druid-otlp-format attestations
+      uses: ./.github/workflows/attestations.yml
+      with:
+        artifact-path: druid-otlp-format/target/druid-otlp-format-1.1.6-SNAPSHOT.jar
+        sbom-path: druid-otlp-format/target/site/*.spdx.json
+    - name: persistence-protobuf attestations
+      uses: ./.github/workflows/attestations.yml
+      with:
+        artifact-path: persistence-protobuf/target/persistence-protobuf-1.1.6-SNAPSHOT.jar
+        sbom-path: persistence-protobuf/target/site/*.spdx.json
+    - name: server-parquet attestations
+      uses: ./.github/workflows/attestations.yml
+      with:
+        artifact-path: server-parquet/target/server-parquet-1.1.6-SNAPSHOT.jar
+        sbom-path: server-parquet/target/site/*.spdx.json
+    - name: collector-embedded attestations
+      uses: ./.github/workflows/attestations.yml
+      with:
+        artifact-path: pom.xml
+        sbom-path: target/site/*.spdx.json
 
     # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
     - name: Update dependency graph
