@@ -45,6 +45,8 @@ jobs:
       with:
         name: deployable-repo
         path: /tmp/maven-repo/
+    - name: List files
+      run: ls -lR .
     - name: Generate collector-embedded SBOM attestation
       uses: actions/attest-sbom@4651f806c01d8637787e274ac3bdf724ef169f34
       with:
