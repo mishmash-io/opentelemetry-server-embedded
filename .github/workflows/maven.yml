@@ -135,7 +135,20 @@ jobs:
       - name: Print artifact
         run: echo ${{ matrix.artifact }}
       - name: find artifact
-        run: find . -name ${{ matrix.artifact }}
+        id: find-artifact
+        run: echo path=$(find . -name ${{ matrix.artifact }}) >> "$GITHUB_OUTPUT"
+      - name: Upload artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ steps.find-artifact.outputs.path }}
+      - name: Build attestation
+        uses: actions/attest-build-provenance@96278af6caaf10aea03fd8d33a09a777ca52d62f
+        with:
+          subject-path: ${{ steps.find-artifact.outputs.path }}
+          subject-name: ${{ matrix.artifact }}
+          push-to-registry: false
+      
 #  collector-embedded-attestations:
 #    permissions:
 #      contents: read
