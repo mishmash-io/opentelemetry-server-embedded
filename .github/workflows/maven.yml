@@ -87,7 +87,7 @@ jobs:
     - name: Generate server-parquet artifact attestation
       uses: actions/attest-build-provenance@96278af6caaf10aea03fd8d33a09a777ca52d62f
       with:
-        subject-path: server-parquet/target/server-parquet/server-parquet-1.1.6-SNAPSHOT.jar
+        subject-path: server-parquet/target/server-parquet-1.1.6-SNAPSHOT.jar
         push-to-registry: false
 #    - name: Generate pom SBOM attestation
 #      uses: actions/attest-sbom@4651f806c01d8637787e274ac3bdf724ef169f34
