@@ -91,17 +91,17 @@ jobs:
       with:
         subject-path: server-parquet/
         push-to-registry: true
-    - name: Generate pom SBOM attestation
-      uses: actions/attest-sbom@4651f806c01d8637787e274ac3bdf724ef169f34
-      with:
-        subject-path: .
-        sbom-path: target/site/io.mishmash.opentelemetry_opentelemetry-server-embedded-1.1.6.spdx.json
-        push-to-registry: true
-    - name: Generate pom artifact attestation
-      uses: actions/attest-build-provenance@96278af6caaf10aea03fd8d33a09a777ca52d62f
-      with:
-        subject-path: .
-        push-to-registry: true
+#    - name: Generate pom SBOM attestation
+#      uses: actions/attest-sbom@4651f806c01d8637787e274ac3bdf724ef169f34
+#      with:
+#        subject-path: .
+#        sbom-path: target/site/io.mishmash.opentelemetry_opentelemetry-server-embedded-1.1.6.spdx.json
+#        push-to-registry: true
+#    - name: Generate pom artifact attestation
+#      uses: actions/attest-build-provenance@96278af6caaf10aea03fd8d33a09a777ca52d62f
+#      with:
+#        subject-path: .
+#        push-to-registry: true
 
     # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
     - name: Update dependency graph
