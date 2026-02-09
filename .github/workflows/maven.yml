@@ -16,9 +16,7 @@ on:
 
 jobs:
   build:
-
-    runs-on: ubuntu-latest
-
+    
     # allow 'Update dependency graph' step below to submit the generated graph
     permissions:
       contents: write
@@ -26,86 +24,4 @@ jobs:
       attestations: write
       artifact-metadata: write
 
-    outputs:
-      artifact-names: ${{ steps.artifacts.outputs.artifacts }}
-      artifact-id: ${{ steps.upload.outputs.artifact-id }}
-
-    steps:
-    - uses: actions/checkout@v4
-    - name: Set up JDK 21
-      uses: actions/setup-java@v3
-      with:
-        java-version: '21'
-        distribution: 'temurin'
-        cache: maven
-        gpg-private-key: ${{ secrets.MMIO_GPG_KEY }}
-        gpg-passphrase: MMIO_GPG_PASSPHRASE
-    - name: Build with Maven
-      env:
-        MAVEN_GPG_PASSPHRASE: ${{ secrets.MMIO_GPG_PASSPHRASE }}
-      run: mvn clean deploy spdx:createSPDX -Dproject.build.outputTimestamp=`date -u +"%FT%TZ"` -Dbuildinfo.ignoreJavadoc=false artifact:buildinfo --file pom.xml
-    - name: Archive deployables
-      id: upload
-      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-      with:
-        name: deployable-repo
-        path: /tmp/maven-repo/
-    - name: Extract artifact names
-      id: artifacts
-      run: echo artifacts=$(cat `find target/ -name \*.buildinfo` | grep '^outputs.*\.filename' | sed 's/.*=//' | jq -Rnc '[inputs]') >> "$GITHUB_OUTPUT"
-    
-    # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
-    - name: Update dependency graph
-      uses: advanced-security/maven-dependency-submission-action@571e99aab1055c2e71a1e2309b9691de18d6b7d6
-      continue-on-error: true
-  
-  post-build:
-    runs-on: ubuntu-latest
-    needs: build
-    permissions:
-      contents: read
-      id-token: write
-      attestations: write
-      artifact-metadata: write
-    strategy:
-      matrix:
-        artifact: ${{ fromJSON(needs.build.outputs.artifact-names) }}
-
-    steps:
-      - name: Download build repo
-        id: repo-download
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131
-        with:
-          artifact-ids: ${{ needs.build.outputs.artifact-id }}
-      - name: Print build repo
-        run: ls -lR ${{ steps.repo-download.outputs.download-path }}
-      - name: Print artifact
-        run: echo ${{ matrix.artifact }}
-      - name: find artifact
-        id: find-artifact
-        run: echo path=$(find . -name ${{ matrix.artifact }}) >> "$GITHUB_OUTPUT"
-      - name: Upload artifact
-        if: ${{ steps.find-artifact.outputs.path != null && steps.find-artifact.outputs.path != '' }}
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: ${{ matrix.artifact }}
-          path: ${{ steps.find-artifact.outputs.path }}
-      - name: Build attestation
-        uses: actions/attest-build-provenance@96278af6caaf10aea03fd8d33a09a777ca52d62f
-        if: ${{ steps.find-artifact.outputs.path != null && steps.find-artifact.outputs.path != '' }}
-        with:
-          subject-path: ${{ steps.find-artifact.outputs.path }}
-          subject-name: ${{ matrix.artifact }}
-          push-to-registry: false
-      - name: Find related SBOM
-        id: find-sbom
-        if: ${{ steps.find-artifact.outputs.path != null && steps.find-artifact.outputs.path != '' && ! endsWith(steps.find-artifact.outputs.path, '.spdx.json') }}
-        run: echo sbom-path=$(find `dirname -- ${{ steps.find-artifact.outputs.path }}` -name \*.spdx.json) >> "$GITHUB_OUTPUT"
-      - name: Add SBOM attestation
-        if: ${{ steps.find-sbom.outputs.sbom-path != null && steps.find-sbom.outputs.sbom-path != '' }}
-        uses: actions/attest-sbom@4651f806c01d8637787e274ac3bdf724ef169f34
-        with:
-          subject-path: ${{ steps.find-artifact.outputs.path }}
-          sbom-path: ${{ steps.find-sbom.outputs.sbom-path }}
-          push-to-registry: false
-          
+    uses: ./.github/workflows/attested_maven_build.yml
