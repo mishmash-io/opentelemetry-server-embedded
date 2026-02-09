@@ -52,48 +52,61 @@ jobs:
       with:
         subject-path: collector-embedded/
         sbom-path: collector-embedded/target/site/io.mishmash.opentelemetry_collector-embedded-1.1.6-SNAPSHOT.spdx.json
-        push-to-registry: true
-    - name: Remove upper case
-      run: cp collector-embedded/target/collector-embedded-1.1.6-SNAPSHOT.jar collector-embedded/target/collector-embedded-1.1.6-snapshot.jar
+        push-to-registry: false
     - name: Generate collector-embedded artifact attestation
       uses: actions/attest-build-provenance@96278af6caaf10aea03fd8d33a09a777ca52d62f
       with:
-        subject-path: '${{ github.workspace }}/collector-embedded/target/collector-embedded-1.1.6-snapshot.jar'
+        subject-path: '${{ github.workspace }}/collector-embedded/target/collector-embedded-1.1.6-SNAPSHOT.jar'
         #subject-name: 'collector-embedded-1.1.6-SNAPSHOT.jar'
-        push-to-registry: true
+        push-to-registry: false
+    - name: Try and publish
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh api 
+          --method POST 
+          -H "Accept: application/vnd.github+json" 
+          -H "X-GitHub-Api-Version: 2022-11-28" 
+          /orgs/mishmash-io/artifacts/metadata/storage-record 
+          -f 'name=collector-embedded' -f 'version=1.1.6-SNAPSHOT'
+          -f "digest=sha:$(sha256sum collector-embedded/target/collector-embedded-1.1.6-SNAPSHOT.jar | sed 's/ .*//')"
+          -f 'artifact_url=https://maven-central-url/test'
+          -f 'registry_url=https://maven-central-url/registry/test'
+          -f 'repository=opentelemetry-server-embedded'
+          -f 'status=active'
     - name: Generate druid-otlp-format SBOM attestation
       uses: actions/attest-sbom@4651f806c01d8637787e274ac3bdf724ef169f34
       with:
         subject-path: druid-otlp-format/
         sbom-path: druid-otlp-format/target/site/io.mishmash.opentelemetry_druid-otlp-format-1.1.6-SNAPSHOT.spdx.json
-        push-to-registry: true
+        push-to-registry: false
     - name: Generate druid-otlp-format artifact attestation
       uses: actions/attest-build-provenance@96278af6caaf10aea03fd8d33a09a777ca52d62f
       with:
         subject-path: druid-otlp-format/
-        push-to-registry: true
+        push-to-registry: false
     - name: Generate persistence-protobuf SBOM attestation
       uses: actions/attest-sbom@4651f806c01d8637787e274ac3bdf724ef169f34
       with:
         subject-path: persistence-protobuf/
         sbom-path: persistence-protobuf/target/site/io.mishmash.opentelemetry_persistence-protobuf-1.1.6-SNAPSHOT.spdx.json
-        push-to-registry: true
+        push-to-registry: false
     - name: Generate persistence-protobuf artifact attestation
       uses: actions/attest-build-provenance@96278af6caaf10aea03fd8d33a09a777ca52d62f
       with:
         subject-path: persistence-protobuf/
-        push-to-registry: true
+        push-to-registry: false
     - name: Generate server-parquet SBOM attestation
       uses: actions/attest-sbom@4651f806c01d8637787e274ac3bdf724ef169f34
       with:
         subject-path: server-parquet/
         sbom-path: server-parquet/target/site/io.mishmash.opentelemetry_server-parquet-1.1.6-SNAPSHOT.spdx.json
-        push-to-registry: true
+        push-to-registry: false
     - name: Generate server-parquet artifact attestation
       uses: actions/attest-build-provenance@96278af6caaf10aea03fd8d33a09a777ca52d62f
       with:
         subject-path: server-parquet/
-        push-to-registry: true
+        push-to-registry: false
 #    - name: Generate pom SBOM attestation
 #      uses: actions/attest-sbom@4651f806c01d8637787e274ac3bdf724ef169f34
 #      with:
