@@ -53,68 +53,12 @@ jobs:
     - name: Extract artifact names
       id: artifacts
       run: echo artifacts=$(cat `find target/ -name \*.buildinfo` | grep '^outputs.*\.filename' | sed 's/.*=//' | jq -Rnc '[inputs]') >> "$GITHUB_OUTPUT"
-#    - name: Generate collector-embedded SBOM attestation
-#      uses: actions/attest-sbom@4651f806c01d8637787e274ac3bdf724ef169f34
-#      with:
-#        subject-path: collector-embedded/target/collector-embedded-1.1.6-test.jar
-#        sbom-path: collector-embedded/target/site/io.mishmash.opentelemetry_collector-embedded-1.1.6-test.spdx.json
-#        push-to-registry: false
-#    - name: Generate collector-embedded artifact attestation
-#      uses: actions/attest-build-provenance@96278af6caaf10aea03fd8d33a09a777ca52d62f
-#      with:
-#        subject-path: collector-embedded/target/collector-embedded-1.1.6-test.jar
-#        push-to-registry: false
-#    - name: Generate druid-otlp-format SBOM attestation
-#      uses: actions/attest-sbom@4651f806c01d8637787e274ac3bdf724ef169f34
-#      with:
-#        subject-path: druid-otlp-format/
-#        sbom-path: druid-otlp-format/target/site/io.mishmash.opentelemetry_druid-otlp-format-1.1.6-test.spdx.json
-#        push-to-registry: false
-#    - name: Generate druid-otlp-format artifact attestation
-#      uses: actions/attest-build-provenance@96278af6caaf10aea03fd8d33a09a777ca52d62f
-#      with:
-#        subject-path: druid-otlp-format/target/druid-otlp-format-1.1.6-test.jar
-#        push-to-registry: false
-#    - name: Generate persistence-protobuf SBOM attestation
-#      uses: actions/attest-sbom@4651f806c01d8637787e274ac3bdf724ef169f34
-#      with:
-#        subject-path: persistence-protobuf/
-#        sbom-path: persistence-protobuf/target/site/io.mishmash.opentelemetry_persistence-protobuf-1.1.6-test.spdx.json
-#        push-to-registry: false
-#    - name: Generate persistence-protobuf artifact attestation
-#      uses: actions/attest-build-provenance@96278af6caaf10aea03fd8d33a09a777ca52d62f
-#      with:
-#        subject-path: persistence-protobuf/target/persistence-protobuf-1.1.6-test.jar
-#        push-to-registry: false
-#    - name: Generate server-parquet SBOM attestation
-#      uses: actions/attest-sbom@4651f806c01d8637787e274ac3bdf724ef169f34
-#      with:
-#        subject-path: server-parquet/
-#        sbom-path: server-parquet/target/site/io.mishmash.opentelemetry_server-parquet-1.1.6-test.spdx.json
-#        push-to-registry: false
-#    - name: Generate server-parquet artifact attestation
-#      uses: actions/attest-build-provenance@96278af6caaf10aea03fd8d33a09a777ca52d62f
-#      with:
-#        subject-path: server-parquet/target/server-parquet-1.1.6-test.jar
-#        push-to-registry: false
-#    - name: Generate pom SBOM attestation
-#      uses: actions/attest-sbom@4651f806c01d8637787e274ac3bdf724ef169f34
-#      with:
-#        subject-path: .
-#        sbom-path: target/site/io.mishmash.opentelemetry_opentelemetry-server-embedded-1.1.6.spdx.json
-#        push-to-registry: true
-#    - name: Generate pom artifact attestation
-#      uses: actions/attest-build-provenance@96278af6caaf10aea03fd8d33a09a777ca52d62f
-#      with:
-#        subject-path: pom.xml
-#        subject-name: opentelemetry-server-embedded-1.1.6-test.pom
-#        push-to-registry: false
-
+    
     # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
     - name: Update dependency graph
       uses: advanced-security/maven-dependency-submission-action@571e99aab1055c2e71a1e2309b9691de18d6b7d6
       continue-on-error: true
-
+  
   post-build:
     runs-on: ubuntu-latest
     needs: build
@@ -164,59 +108,4 @@ jobs:
           subject-path: ${{ steps.find-artifact.outputs.path }}
           sbom-path: ${{ steps.find-sbom.outputs.sbom-path }}
           push-to-registry: false
-      
-#  collector-embedded-attestations:
-#    permissions:
-#      contents: read
-#      id-token: write
-#      attestations: write
-#      artifact-metadata: write
-#    needs: build
-#    uses: mishmash-io/opentelemetry-server-embedded/.github/workflows/attestations.yml@main
-#    with:
-#      artifact-path: collector-embedded/target/collector-embedded-1.1.6-test.jar
-#      sbom-path: collector-embedded/target/site/*.spdx.json
-#  druid-otlp-format-attestations:
-#    permissions:
-#      contents: read
-#      id-token: write
-#      attestations: write
-#      artifact-metadata: write
-#    needs: build
-#    uses: mishmash-io/opentelemetry-server-embedded/.github/workflows/attestations.yml@main
-#    with:
-#      artifact-path: druid-otlp-format/target/druid-otlp-format-1.1.6-test.jar
-#      sbom-path: druid-otlp-format/target/site/*.spdx.json
-#  persistence-protobuf_attestations:
-#    permissions:
-#      contents: read
-#      id-token: write
-#      attestations: write
-#      artifact-metadata: write
-#    needs: build
-#    uses: mishmash-io/opentelemetry-server-embedded/.github/workflows/attestations.yml@main
-#    with:
-#      artifact-path: persistence-protobuf/target/persistence-protobuf-1.1.6-test.jar
-#      sbom-path: persistence-protobuf/target/site/*.spdx.json
-#  server-parquet-attestations:
-#    permissions:
-#      contents: read
-#      id-token: write
-#      attestations: write
-#      artifact-metadata: write
-#    needs: build
-#    uses: mishmash-io/opentelemetry-server-embedded/.github/workflows/attestations.yml@main
-#    with:
-#      artifact-path: server-parquet/target/server-parquet-1.1.6-test.jar
-#      sbom-path: server-parquet/target/site/*.spdx.json
-#  pom-attestations:
-#    permissions:
-#      contents: read
-#      id-token: write
-#      attestations: write
-#      artifact-metadata: write
-#    needs: build
-#    uses: mishmash-io/opentelemetry-server-embedded/.github/workflows/attestations.yml@main
-#    with:
-#      artifact-path: pom.xml
-#      sbom-path: target/site/*.spdx.json
+          
