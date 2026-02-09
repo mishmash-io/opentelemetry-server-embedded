@@ -73,7 +73,7 @@
   </developers>
 
   <properties>
-    <druid.version>35.0.1</druid.version>
+    <druid.version>36.0.0</druid.version>
   </properties>
 
   <build>
