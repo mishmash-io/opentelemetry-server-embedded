@@ -155,7 +155,7 @@ jobs:
           push-to-registry: false
       - name: Find related SBOM
         id: find-sbom
-        if: ${{ ! endsWith(steps.find-artifact.outputs.path, '.spdx.json') }}
+        if: ${{ steps.find-artifact.outputs.path != null && steps.find-artifact.outputs.path != '' && ! endsWith(steps.find-artifact.outputs.path, '.spdx.json') }}
         run: echo sbom-path=$(find `dirname -- ${{ steps.find-artifact.outputs.path }}` -name \*.spdx.json) >> "$GITHUB_OUTPUT"
       - name: Add SBOM attestation
         if: ${{ steps.find-sbom.outputs.sbom-path != null && steps.find-sbom.outputs.sbom-path != '' }}
