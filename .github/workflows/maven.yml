@@ -116,6 +116,8 @@ jobs:
   post-build:
     runs-on: ubuntu-latest
     needs: build
+    permissions:
+      contents: read
     strategy:
       matrix:
         artifact: ${{ fromJSON(needs.build.outputs.artifacts) }}
@@ -124,7 +126,7 @@ jobs:
       - name: Print artifact
         run: echo ${{ matrix.artifact }}
       - name: find artifact
-        run: find . - name ${{ matrix.artifact }}
+        run: find . -name ${{ matrix.artifact }}
 #  collector-embedded-attestations:
 #    permissions:
 #      contents: read
