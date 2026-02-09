@@ -56,7 +56,7 @@ jobs:
     - name: Generate collector-embedded artifact attestation
       uses: actions/attest-build-provenance@96278af6caaf10aea03fd8d33a09a777ca52d62f
       with:
-        subject-path: 'collector-embedded/target/*collector-embedded-1.1.6-SNAPSHOT.jar'
+        subject-path: '${{ github.workspace }}/collector-embedded/target/collector-embedded-1.1.6-SNAPSHOT.jar'
         push-to-registry: true
     - name: Generate druid-otlp-format SBOM attestation
       uses: actions/attest-sbom@4651f806c01d8637787e274ac3bdf724ef169f34
