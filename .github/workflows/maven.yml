@@ -141,6 +141,7 @@ jobs:
         id: find-artifact
         run: echo path=$(find . -name ${{ matrix.artifact }}) >> "$GITHUB_OUTPUT"
       - name: Upload artifact
+        if: ${{ steps.find-artifact.outputs.path != null && steps.find-artifact.outputs.path != '' }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: ${{ matrix.artifact }}
