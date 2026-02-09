@@ -27,7 +27,8 @@ jobs:
       artifact-metadata: write
 
     outputs:
-      artifacts: ${{ steps.artifacts.outputs.artifacts }}
+      artifact-names: ${{ steps.artifacts.outputs.artifacts }}
+      artifact-id: ${{ steps.upload.outputs.artifact-id }}
 
     steps:
     - uses: actions/checkout@v4
@@ -44,6 +45,7 @@ jobs:
         MAVEN_GPG_PASSPHRASE: ${{ secrets.MMIO_GPG_PASSPHRASE }}
       run: mvn clean deploy spdx:createSPDX -Dproject.build.outputTimestamp=`date -u +"%FT%TZ"` -Dbuildinfo.ignoreJavadoc=false artifact:buildinfo --file pom.xml
     - name: Archive deployables
+      id: upload
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
         name: deployable-repo
@@ -120,9 +122,13 @@ jobs:
       contents: read
     strategy:
       matrix:
-        artifact: ${{ fromJSON(needs.build.outputs.artifacts) }}
+        artifact: ${{ fromJSON(needs.build.outputs.artifact-names) }}
 
     steps:
+      - name: Download build repo
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131
+        with:
+          artifact-ids: ${{ needs.build.outputs.artifact-id }}
       - name: Print artifact
         run: echo ${{ matrix.artifact }}
       - name: find artifact
