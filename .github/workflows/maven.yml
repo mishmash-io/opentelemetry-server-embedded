@@ -119,7 +119,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     permissions:
-      contents: read
+      contents: write
+      id-token: write
+      attestations: write
+      artifact-metadata: write
     strategy:
       matrix:
         artifact: ${{ fromJSON(needs.build.outputs.artifact-names) }}
