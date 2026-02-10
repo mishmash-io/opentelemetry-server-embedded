@@ -81,18 +81,18 @@ jobs:
       - name: Create attestation
         id: create-attestation
         uses: actions/attest-build-provenance@96278af6caaf10aea03fd8d33a09a777ca52d62f
-        if: ${{ steps.upload-artifact.outcome == 'success' }}
+        if: ${{ github.event_name == 'release' && steps.upload-artifact.outcome == 'success' }}
         with:
           subject-path: ${{ steps.find-artifact.outputs.path }}
           subject-name: ${{ matrix.artifact }}
           push-to-registry: false
       - name: Find related SBOM
         id: find-sbom
-        if: ${{ steps.upload-artifact.outcome == 'success' && ! endsWith(steps.find-artifact.outputs.path, '.spdx.json') }}
+        if: ${{ github.event_name == 'release' && steps.upload-artifact.outcome == 'success' && ! endsWith(steps.find-artifact.outputs.path, '.spdx.json') }}
         run: echo sbom-path=$(find `dirname -- ${{ steps.find-artifact.outputs.path }}` -name \*.spdx.json) >> "$GITHUB_OUTPUT"
       - name: Add SBOM attestation
         id: sbom-attestation
-        if: ${{ steps.find-sbom.outputs.sbom-path != null && steps.find-sbom.outputs.sbom-path != '' }}
+        if: ${{ github.event_name == 'release' && steps.find-sbom.outputs.sbom-path != null && steps.find-sbom.outputs.sbom-path != '' }}
         uses: actions/attest-sbom@4651f806c01d8637787e274ac3bdf724ef169f34
         with:
           subject-path: ${{ steps.find-artifact.outputs.path }}
