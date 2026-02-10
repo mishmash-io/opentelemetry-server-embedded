@@ -45,6 +45,8 @@ jobs:
         path: /tmp/maven-repo/
     - name: Add asset to release
       if: ${{ github.event_name == 'release' }}
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: zip -r /tmp/maven-deployable-repo.zip /tmp/maven-repo/ && gh release upload "${{ github.ref_name }}" /tmp/maven-deployable-repo.zip
     - name: Extract artifact names
       id: artifacts
