@@ -106,8 +106,3 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release upload "${{ github.ref_name }}" ${{ steps.find-artifact.outputs.path }}
-      - name: Upload SBOM release asset
-        if: ${{ github.event_name == 'release' && steps.sbom-attestation.outcome == 'success' }}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload "${{ github.ref_name }}" ${{ steps.find-sbom.outputs.sbom-path }}
