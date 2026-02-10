@@ -90,8 +90,15 @@ jobs:
           push-to-registry: false
       - name: Find related SBOM
         id: find-sbom
-        if: ${{ github.event_name == 'release' && steps.upload-artifact.outcome == 'success' && ! endsWith(steps.find-artifact.outputs.path, '.spdx.json') }}
+        if: ${{ steps.upload-artifact.outcome == 'success' && ! endsWith(steps.find-artifact.outputs.path, '.spdx.json') }}
         run: echo sbom-path=$(find `dirname -- ${{ steps.find-artifact.outputs.path }}` -name \*.spdx.json) >> "$GITHUB_OUTPUT"
+      - name: Upload the SBOM
+        id: upload-sbom
+        if: ${{ steps.find-sbom.outputs.sbom-path != null && steps.find-sbom.outputs.sbom-path != '' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: "${{ matrix.artifact }} SBOM"
+          path: ${{ steps.find-sbom.outputs.sbom-path }}
       - name: Add SBOM attestation
         id: sbom-attestation
         if: ${{ github.event_name == 'release' && steps.find-sbom.outputs.sbom-path != null && steps.find-sbom.outputs.sbom-path != '' }}
