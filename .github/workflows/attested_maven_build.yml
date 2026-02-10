@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
-      contents: read
+      contents: write
       attestations: write
       artifact-metadata: write
     outputs:
@@ -41,8 +41,11 @@ jobs:
       id: upload
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
-        name: deployable-repo
+        name: maven-deployable-repo
         path: /tmp/maven-repo/
+    - name: Add asset to release
+      if: ${{ github.event_name == 'release' }}
+      run: zip -r /tmp/maven-deployable-repo.zip /tmp/maven-repo/ && gh release upload "${{ github.ref_name }}" /tmp/maven-deployable-repo.zip
     - name: Extract artifact names
       id: artifacts
       run: echo artifacts=$(cat `find target/ -name \*.buildinfo` | grep '^outputs.*\.filename' | sed 's/.*=//' | jq -Rnc '[inputs]') >> "$GITHUB_OUTPUT"
@@ -51,7 +54,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     permissions:
-      contents: read
+      contents: write
       id-token: write
       attestations: write
       artifact-metadata: write
@@ -69,26 +72,39 @@ jobs:
         id: find-artifact
         run: echo path=$(find . -name ${{ matrix.artifact }}) >> "$GITHUB_OUTPUT"
       - name: Upload the artifact
+        id: upload-artifact
         if: ${{ steps.find-artifact.outputs.path != null && steps.find-artifact.outputs.path != '' }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: ${{ matrix.artifact }}
           path: ${{ steps.find-artifact.outputs.path }}
       - name: Create attestation
+        id: create-attestation
         uses: actions/attest-build-provenance@96278af6caaf10aea03fd8d33a09a777ca52d62f
-        if: ${{ steps.find-artifact.outputs.path != null && steps.find-artifact.outputs.path != '' }}
+        if: ${{ github.event_name == 'release' && steps.upload-artifact.outcome == 'success' }}
         with:
           subject-path: ${{ steps.find-artifact.outputs.path }}
           subject-name: ${{ matrix.artifact }}
           push-to-registry: false
       - name: Find related SBOM
         id: find-sbom
-        if: ${{ steps.find-artifact.outputs.path != null && steps.find-artifact.outputs.path != '' && ! endsWith(steps.find-artifact.outputs.path, '.spdx.json') }}
+        if: ${{ github.event_name == 'release' && steps.upload-artifact.outcome == 'success' && ! endsWith(steps.find-artifact.outputs.path, '.spdx.json') }}
         run: echo sbom-path=$(find `dirname -- ${{ steps.find-artifact.outputs.path }}` -name \*.spdx.json) >> "$GITHUB_OUTPUT"
       - name: Add SBOM attestation
-        if: ${{ steps.find-sbom.outputs.sbom-path != null && steps.find-sbom.outputs.sbom-path != '' }}
+        id: sbom-attestation
+        if: ${{ github.event_name == 'release' && steps.find-sbom.outputs.sbom-path != null && steps.find-sbom.outputs.sbom-path != '' }}
         uses: actions/attest-sbom@4651f806c01d8637787e274ac3bdf724ef169f34
         with:
           subject-path: ${{ steps.find-artifact.outputs.path }}
           sbom-path: ${{ steps.find-sbom.outputs.sbom-path }}
           push-to-registry: false
+      - name: Upload release asset
+        if: ${{ github.event_name == 'release' && steps.upload-artifact.outcome == 'success' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "${{ github.ref_name }}" ${{ steps.find-artifact.outputs.path }}
+      - name: Upload SBOM release asset
+        if: ${{ github.event_name == 'release' && steps.sbom-attestation.outcome == 'success' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "${{ github.ref_name }}" ${{ steps.find-sbom.outputs.sbom-path }}

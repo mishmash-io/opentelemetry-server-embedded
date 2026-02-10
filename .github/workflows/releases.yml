@@ -1,16 +1,14 @@
-name: Java CI with Maven
+name: Release assets
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  release:
+    types: [published]
 
 permissions:
   contents: read
 
 jobs:
-  build:
+  release-assets:
     permissions:
       contents: write
       id-token: write
