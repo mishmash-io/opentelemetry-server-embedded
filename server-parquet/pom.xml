@@ -149,7 +149,7 @@
       <groupId>org.apache.parquet</groupId>
       <artifactId>parquet-protobuf</artifactId>
       <version>${parquet.version}</version>
-	</dependency>
+    </dependency>
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-client</artifactId>
