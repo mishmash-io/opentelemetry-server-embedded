@@ -132,6 +132,7 @@ public final class ProtobufSpans {
                 withDefaults
                     ? ProtobufUtils.withUnsetFields(span)
                     : span.getAllFields().entrySet(),
+                null, // string lookup tables not used in trace messages
                 withDefaults);
     }
 }

@@ -71,6 +71,8 @@ public final class ProtobufProfiles {
                     .setSampleSeqNo(profile.getSampleSeqNo())
                     .setValueSeqNo(profile.getValueSeqNo())
                     .setIsValid(profile.isValid());
+        List<String> stringLookup =
+                profile.getDictionary().getStringTableList();
 
         if (profile.getErrorMessage() != null) {
             builder = builder
@@ -81,7 +83,9 @@ public final class ProtobufProfiles {
                 profile.getResourceDroppedAttributesCount());
 
         Iterable<KeyValue> resourceAttributes =
-                profile.getResourceAttributes();
+                ProtobufUtils.lookupKeyValues(
+                        profile.getResourceAttributes(),
+                        stringLookup);
         if (resourceAttributes != null) {
             builder = builder
                     .addAllResourceAttributes(resourceAttributes);
@@ -104,7 +108,9 @@ public final class ProtobufProfiles {
                     .setScopeName(profile.getScope().getName())
                     .setScopeVersion(profile.getScope().getVersion())
                     .addAllScopeAttributes(
-                            profile.getScope().getAttributesList())
+                            ProtobufUtils.lookupKeyValues(
+                                    profile.getScope().getAttributesList(),
+                                    stringLookup))
                     .setScopeDroppedAttributesCount(
                             profile.getScope()
                                 .getDroppedAttributesCount());
@@ -291,7 +297,9 @@ public final class ProtobufProfiles {
             final KeyValueAndUnit attr) {
         return KeyValueUnit.newBuilder()
                 .setKey(dictionary.getStringTable(attr.getKeyStrindex()))
-                .setValue(attr.getValue())
+                .setValue(ProtobufUtils.lookupAnyValue(
+                        attr.getValue(),
+                        dictionary.getStringTableList()))
                 .setUnit(dictionary.getStringTable(attr.getUnitStrindex()));
     }
 
@@ -398,6 +406,7 @@ public final class ProtobufProfiles {
                 withDefaults
                     ? ProtobufUtils.withUnsetFields(profile)
                     : profile.getAllFields().entrySet(),
+                null, // PersistedProfile should already have all strings
                 withDefaults);
     }
 }

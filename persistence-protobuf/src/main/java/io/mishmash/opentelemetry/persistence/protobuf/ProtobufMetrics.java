@@ -233,6 +233,7 @@ public final class ProtobufMetrics {
                 withDefaults
                     ? ProtobufUtils.withUnsetFields(metric)
                     : metric.getAllFields().entrySet(),
+                null, // string lookup not used in metrics messages for now
                 withDefaults);
     }
 }

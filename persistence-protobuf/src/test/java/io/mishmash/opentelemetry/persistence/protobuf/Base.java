@@ -314,6 +314,9 @@ public class Base {
         case STRING_VALUE:
             builder = builder.setStringValue((String) value);
             break;
+        case STRING_VALUE_STRINDEX:
+            builder = builder.setStringValueStrindex((int) value);
+            break;
         case VALUE_NOT_SET:
             break;
         default:
@@ -393,6 +396,11 @@ public class Base {
             assertArrayEquals(
                     expected.getBytesValue().toByteArray(),
                     actual.getBytesValue().toByteArray());
+            break;
+        case STRING_VALUE_STRINDEX:
+            assertEquals(
+                    expected.getStringValueStrindex(),
+                    actual.getStringValueStrindex());
             break;
         case VALUE_NOT_SET:
             break;

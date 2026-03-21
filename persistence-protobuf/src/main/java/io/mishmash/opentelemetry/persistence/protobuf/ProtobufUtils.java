@@ -24,12 +24,17 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.StreamSupport;
+
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Descriptors.EnumValueDescriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
 import io.opentelemetry.proto.common.v1.AnyValue;
+import io.opentelemetry.proto.common.v1.ArrayValue;
 import io.opentelemetry.proto.common.v1.KeyValue;
+import io.opentelemetry.proto.common.v1.KeyValueList;
 
 /**
  * Various helper methods for general protobuf message handling.
@@ -42,12 +47,12 @@ public final class ProtobufUtils {
 
     /**
      * Prepare a {@link Collection} of entries suitable for
-     * {@link #toJsonMap(Collection, boolean)} when defaults for
+     * {@link #toJsonMap(Collection, List, boolean)} when defaults for
      * unset fields are also needed.
      *
      * @param msg the {@link Message}
      * @return a {@link Collection} to pass to
-     * {@link #toJsonMap(Collection, boolean)}
+     * {@link #toJsonMap(Collection, List, boolean)}
      */
     public static Collection<Map.Entry<FieldDescriptor, Object>>
             withUnsetFields(final Message msg) {
@@ -69,18 +74,25 @@ public final class ProtobufUtils {
      * for fields that are not set in a Message.
      *
      * @param entries the protobuf fields
+     * @param stringLookup a string lookup table to resolve string index values
+     * (if used) or null
      * @param withDefaults pass true when defaults for unset fields are
      * to be included
      * @return a JSON-friendly {@link Map}
      */
     public static Map<String, Object> toJsonMap(
             final Collection<Map.Entry<FieldDescriptor, Object>> entries,
+            final List<String> stringLookup,
             final boolean withDefaults) {
         Map<String, Object> res = new LinkedHashMap<>(entries.size());
 
         for (Map.Entry<FieldDescriptor, Object> ent : entries) {
             res.put(ent.getKey().getName(),
-                    toJsonValue(ent.getKey(), ent.getValue(), withDefaults));
+                    toJsonValue(
+                            ent.getKey(),
+                            ent.getValue(),
+                            stringLookup,
+                            withDefaults));
         }
 
         return res;
@@ -95,6 +107,7 @@ public final class ProtobufUtils {
     private static Object toJsonValue(
             final FieldDescriptor field,
             final Object value,
+            final List<String> stringLookup,
             final boolean withDefaults) {
         if (field.isMapField()) {
             if (value == null && withDefaults) {
@@ -123,10 +136,12 @@ public final class ProtobufUtils {
                         (String) toJsonValueSingle(
                                 k,
                                 ((Message) element).getField(k),
+                                stringLookup,
                                 withDefaults),
                         toJsonValueSingle(
                                 v,
                                 ((Message) element).getField(v),
+                                stringLookup,
                                 withDefaults));
             }
 
@@ -138,24 +153,33 @@ public final class ProtobufUtils {
                 @SuppressWarnings("unchecked")
                 List<KeyValue> kvs = (List<KeyValue>) value;
 
-                return toJsonValue(kvs, withDefaults);
+                return toJsonValue(kvs, stringLookup, withDefaults);
             } else {
                 List<?> valuesList = (List<?>) value;
                 List<Object> resList = new ArrayList<>(valuesList.size());
 
                 for (Object o : valuesList) {
-                    resList.add(toJsonValueSingle(field, o, withDefaults));
+                    resList.add(toJsonValueSingle(
+                            field,
+                            o,
+                            stringLookup,
+                            withDefaults));
                 }
 
                 return resList;
             }
         } else {
-            return toJsonValueSingle(field, value, withDefaults);
+            return toJsonValueSingle(
+                    field,
+                    value,
+                    stringLookup,
+                    withDefaults);
         }
     }
 
     private static Object toJsonValue(
             final List<KeyValue> kvs,
+            final List<String> stringLookup,
             final boolean withDefaults) {
         if (kvs == null) {
             return Collections.emptyList();
@@ -166,7 +190,7 @@ public final class ProtobufUtils {
         for (KeyValue kv : kvs) {
             res.put(
                     kv.getKey(),
-                    toJsonValue(kv.getValue(), withDefaults));
+                    toJsonValue(kv.getValue(), stringLookup, withDefaults));
         }
 
         return res;
@@ -174,6 +198,7 @@ public final class ProtobufUtils {
 
     private static Object toJsonValue(
             final AnyValue av,
+            final List<String> stringLookup,
             final boolean withDefaults) {
         if (av == null && withDefaults) {
             // return an object, the most 'complex' value type
@@ -185,7 +210,7 @@ public final class ProtobufUtils {
             List<Object> res = new ArrayList<>(
                     av.getArrayValue().getValuesCount());
             for (AnyValue a : av.getArrayValue().getValuesList()) {
-                res.add(toJsonValue(a, withDefaults));
+                res.add(toJsonValue(a, stringLookup, withDefaults));
             }
 
             return res;
@@ -200,9 +225,20 @@ public final class ProtobufUtils {
         case KVLIST_VALUE:
             return toJsonValue(
                     av.getKvlistValue().getValuesList(),
+                    stringLookup,
                     withDefaults);
         case STRING_VALUE:
             return av.getStringValue();
+        case STRING_VALUE_STRINDEX:
+            try {
+                Objects.requireNonNull(stringLookup,
+                        "String lookup table must be provided");
+
+                return stringLookup.get(av.getStringValueStrindex());
+            } catch (Exception e) {
+                throw new IllegalArgumentException(
+                        "Failed to handle AnyValue string index", e);
+            }
         case VALUE_NOT_SET:
             return null;
         default:
@@ -216,6 +252,7 @@ public final class ProtobufUtils {
     private static Object toJsonValueSingle(
             final FieldDescriptor field,
             final Object value,
+            final List<String> stringLookup,
             final boolean withDefaults) {
         if (value == null && !withDefaults) {
             throw new IllegalArgumentException(
@@ -250,6 +287,7 @@ public final class ProtobufUtils {
                 } else {
                     return toJsonMap(
                             withUnsetFields((Message) value),
+                            stringLookup,
                             withDefaults);
                 }
             } else if (value == null) {
@@ -258,6 +296,7 @@ public final class ProtobufUtils {
 
             return toJsonMap(
                     ((Message) value).getAllFields().entrySet(),
+                    stringLookup,
                     withDefaults);
         case BOOL:
             return value == null && withDefaults
@@ -300,6 +339,7 @@ public final class ProtobufUtils {
 
     private static Object toJsonNestedValue(
             final Message m,
+            final List<String> stringLookup,
             final boolean withDefaults) {
         FieldDescriptor v = m.getDescriptorForType().findFieldByName("value");
 
@@ -312,6 +352,117 @@ public final class ProtobufUtils {
         return toJsonValueSingle(
                 v,
                 m.getField(v),
+                stringLookup,
                 withDefaults);
+    }
+
+    /**
+     * Resolve any strings, in keys and values, that may be set as indexes in
+     * dictionary.
+     *
+     * @param keyValues and Iterable of KeyValues to look into (both keys and
+     * values are checked)
+     * @param lookupTable the dictionary
+     * @return a list of the same values with all strings resolved
+     */
+    public static Iterable<KeyValue> lookupKeyValues(
+            final Iterable<KeyValue> keyValues,
+            final List<String> lookupTable) {
+        return StreamSupport.stream(keyValues.spliterator(), false)
+            .map(kv -> lookupKeyValue(kv, lookupTable))
+            .toList();
+    }
+
+    /**
+     * Resolve any strings, in keys and values, that may be set as indexes in
+     * dictionary.
+     *
+     * @param kv the KeyValue to look into (both key and value are checked)
+     * @param lookupTable the dictionary
+     * @return a KeyValue with all strings resolved
+     */
+    public static KeyValue lookupKeyValue(
+            final KeyValue kv,
+            final List<String> lookupTable) {
+        KeyValue.Builder res = KeyValue.newBuilder();
+
+        String key = kv.getKey();
+        if (key == null || key.isEmpty()) {
+            res = res.setKey(lookupTable.get(kv.getKeyStrindex()));
+        } else {
+            res = res.setKey(key);
+        }
+
+        if (kv.hasValue()) {
+            res = res.setValue(lookupAnyValue(kv.getValue(), lookupTable));
+        }
+
+        return res.build();
+    }
+
+    /**
+     * Resolve any strings that may be set as indexes in dictionary.
+     *
+     * @param values and Iterable of AnyValues to look into
+     * @param lookupTable the dictionary
+     * @return a list of the same values with all strings resolved
+     */
+    public static Iterable<AnyValue> lookupAnyValues(
+            final Iterable<AnyValue> values,
+            final List<String> lookupTable) {
+        return StreamSupport.stream(values.spliterator(), false)
+                .map(av -> lookupAnyValue(av, lookupTable))
+                .toList();
+    }
+
+    /**
+     * Resolve any strings that may be set as indexes in dictionary.
+     *
+     * @param av the AnyValue to look into
+     * @param lookupTable the dictionary
+     * @return an AnyValue with all strings resolved
+     */
+    public static AnyValue lookupAnyValue(
+            final AnyValue av,
+            final List<String> lookupTable) {
+        switch (av.getValueCase()) {
+        case BOOL_VALUE:
+        case BYTES_VALUE:
+        case DOUBLE_VALUE:
+        case INT_VALUE:
+        case STRING_VALUE:
+        case VALUE_NOT_SET:
+            // no remapping needed, return as is
+            return av;
+        case ARRAY_VALUE:
+            return AnyValue.newBuilder()
+                    .setArrayValue(
+                            ArrayValue.newBuilder()
+                                .addAllValues(
+                                        lookupAnyValues(
+                                                av.getArrayValue()
+                                                    .getValuesList(),
+                                                lookupTable)))
+                    .build();
+        case KVLIST_VALUE:
+            return AnyValue.newBuilder()
+                    .setKvlistValue(
+                            KeyValueList.newBuilder()
+                                .addAllValues(
+                                        lookupKeyValues(
+                                                av.getKvlistValue()
+                                                    .getValuesList(),
+                                                lookupTable)))
+                    .build();
+        case STRING_VALUE_STRINDEX:
+            return AnyValue.newBuilder()
+                    .setStringValue(
+                            lookupTable.get(av.getStringValueStrindex()))
+                    .build();
+        default:
+            throw new UnsupportedOperationException(
+                    String.format("Unknown AnyValue type '%s'",
+                            av.getValueCase()));
+        }
     }
 }
