@@ -447,6 +447,21 @@ public class Base {
     }
 
     public void testKeyValueList(KeyValueList expected, KeyValueList actual) {
-        
+        assertEquals(
+                expected.getValuesCount(),
+                actual.getValuesCount());
+
+        for (int i = 0; i < expected.getValuesCount(); i++) {
+            KeyValue expectedKv = expected.getValues(i);
+            KeyValue actualKv = actual.getValues(i);
+
+            assertEquals(
+                    expectedKv.getKey(),
+                    actualKv.getKey());
+
+            testAnyValue(
+                    expectedKv.getValue(),
+                    actualKv.getValue());
+        }
     }
 }
