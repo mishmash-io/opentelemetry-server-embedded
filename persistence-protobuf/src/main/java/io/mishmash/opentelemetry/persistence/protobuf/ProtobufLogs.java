@@ -125,6 +125,9 @@ public final class ProtobufLogs {
             case STRING_VALUE:
                 builder = builder.setBodyString(body.getStringValue());
                 break;
+            case STRING_VALUE_STRINDEX:
+                // FIXME: should not be used for logs yet
+                break;
             case VALUE_NOT_SET:
                 // FIXME: what to do when not set?
                 break;
@@ -157,6 +160,7 @@ public final class ProtobufLogs {
                 withDefaults
                     ? ProtobufUtils.withUnsetFields(log)
                     : log.getAllFields().entrySet(),
+                null, // String lookup not used in log messages for now
                 withDefaults);
     }
 }
