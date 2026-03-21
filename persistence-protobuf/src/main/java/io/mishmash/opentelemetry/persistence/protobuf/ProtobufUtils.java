@@ -200,9 +200,12 @@ public final class ProtobufUtils {
             final AnyValue av,
             final List<String> stringLookup,
             final boolean withDefaults) {
-        if (av == null && withDefaults) {
-            // return an object, the most 'complex' value type
-            return Collections.<String, Object>emptyMap();
+        if (av == null) {
+            return withDefaults
+                    ? // return an object, the most 'complex' value type
+                        Collections.<String, Object>emptyMap()
+                    : // return as if the value is not set
+                        null;
         }
 
         switch (av.getValueCase()) {

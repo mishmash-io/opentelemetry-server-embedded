@@ -876,20 +876,21 @@ public abstract class AbstractCollector<
             try {
                 HttpServerRequest request = ctx.request();
 
-                InputStream is = request.isEnded()
+                try (InputStream is = request.isEnded()
                         ? new ByteArrayInputStream(
                                 request.body().result().getBytes())
                         : new VertxInputStream(
                                 request,
-                                parseContentLengthHeader(request));
+                                parseContentLengthHeader(request))) {
 
-                request.resume();
+                    request.resume();
 
-                setOtelRequest(ctx, isJsonRequest(ctx)
-                        ? parseHttpJson(is)
-                        : parseHttpProtobuf(is));
+                    setOtelRequest(ctx, isJsonRequest(ctx)
+                            ? parseHttpJson(is)
+                            : parseHttpProtobuf(is));
 
-                ctx.next();
+                    ctx.next();
+                }
             } catch (Exception e) {
                 LOG.log(Level.WARNING, """
                         Collector received unparsable message, returning \
