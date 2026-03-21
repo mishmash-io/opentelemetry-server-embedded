@@ -456,6 +456,10 @@ public class Base {
             KeyValue actualKv = actual.getValues(i);
 
             assertEquals(
+                    expectedKv.getKeyStrindex(),
+                    actualKv.getKeyStrindex());
+
+            assertEquals(
                     expectedKv.getKey(),
                     actualKv.getKey());
 
