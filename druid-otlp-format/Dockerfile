@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-FROM maven AS builder
+FROM maven:3.9.14-eclipse-temurin-21-alpine AS builder
 
 WORKDIR /tmp/maven-deps
 RUN --mount=type=bind,source=.,target=/tmp/maven-deps,rw,Z cd /tmp/maven-deps && \
@@ -24,4 +24,4 @@ WORKDIR /opt/druid
 RUN mkdir /opt/druid/.m2
 RUN --mount=type=bind,from=builder,source=/root/.m2,target=/opt/druid/.m2 bin/run-java \
     -classpath "lib/*" org.apache.druid.cli.Main tools pull-deps \
-    --no-default-hadoop -c "io.mishmash.opentelemetry:druid-otlp-format:1.1.6"
+    --no-default-hadoop -c "io.mishmash.opentelemetry:druid-otlp-format:1.1.7"
