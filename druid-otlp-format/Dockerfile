@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-FROM maven AS builder
+FROM maven:3.9.14-eclipse-temurin-21-alpine AS builder
 
 WORKDIR /tmp/maven-deps
 RUN --mount=type=bind,source=.,target=/tmp/maven-deps,rw,Z cd /tmp/maven-deps && \
