@@ -146,6 +146,12 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>io.opentelemetry.javaagent</groupId>
+      <artifactId>opentelemetry-javaagent</artifactId>
+      <version>${opentelemetry.agent.version}</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
       <groupId>org.apache.parquet</groupId>
       <artifactId>parquet-protobuf</artifactId>
       <version>${parquet.version}</version>
