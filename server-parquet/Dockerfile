@@ -15,9 +15,15 @@
 FROM eclipse-temurin:21-jre-alpine
 ADD ./target/dependency /opt/server-parquet
 COPY target/server-parquet-*.jar /opt/server-parquet
+RUN mkdir /opt/opentelemetry
+RUN mv /opt/server-parquet/opentelemetry-javaagent-*.jar /opt/opentelemetry/opentelemetry-javaagent.jar
 RUN mkdir -p /parquet
 
 EXPOSE 4317 4318
 ENV PARQUET_LOCATION=/parquet
+ENV OWN_TELEMETRY_ENABLE=false
+ENV OTEL_SERVICE_NAME="otlp-server-parquet"
+ENV OTEL_EXPORTER_OTLP_PROTOCOL="grpc"
+ENV OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317"
 
-ENTRYPOINT [ "java", "-cp", "/opt/server-parquet/*", "io.mishmash.opentelemetry.server.parquet.CollectorsMain"]
+ENTRYPOINT [ "/bin/sh", "-c", "java `[ \"$(echo $OWN_TELEMETRY_ENABLE | tr '[:lower:]' '[:upper:]')\" == \"TRUE\" ] && echo \"-javaagent:/opt/opentelemetry/opentelemetry-javaagent.jar\"` -cp /opt/server-parquet/\\* io.mishmash.opentelemetry.server.parquet.CollectorsMain" ]
