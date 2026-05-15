@@ -26,4 +26,4 @@ ENV OTEL_SERVICE_NAME="otlp-server-parquet"
 ENV OTEL_EXPORTER_OTLP_PROTOCOL="grpc"
 ENV OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317"
 
-ENTRYPOINT [ "java", '`[ "${OWN_TELEMETRY_ENABLE^^}" == "TRUE" ] && echo "-javaagent:/opt/opentelemetry/opentelemetry-javaagent.jar"`', "-cp", "/opt/server-parquet/*", "io.mishmash.opentelemetry.server.parquet.CollectorsMain"]
+ENTRYPOINT [ "/bin/sh", "-c", "java `[ \"$(echo $OWN_TELEMETRY_ENABLE | tr '[:lower:]' '[:upper:]')\" == \"TRUE\" ] && echo \"-javaagent:/opt/opentelemetry/opentelemetry-javaagent.jar\"` -cp /opt/server-parquet/\\* io.mishmash.opentelemetry.server.parquet.CollectorsMain" ]
