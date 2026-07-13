@@ -71,7 +71,7 @@
   <properties>
     <protobuf.version>4.35.1</protobuf.version>
     <vertx.version>5.1.5</vertx.version>
-    <opentelemetry.version>1.63.0</opentelemetry.version>
+    <opentelemetry.version>1.64.0</opentelemetry.version>
     <opentelemetry.agent.version>2.29.0</opentelemetry.agent.version>
     <opentelemetry.proto.version>1.10.0-alpha</opentelemetry.proto.version>
     <junit5.version>6.1.2</junit5.version>
