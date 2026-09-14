@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:21-jre-alpine@sha256:d35199d74a3b2dff1bfb435d9adde4ef974e74a7d2a4fcb3079063c55926edb5
 ADD ./target/dependency /opt/server-parquet
 COPY target/server-parquet-*.jar /opt/server-parquet
 RUN mkdir /opt/opentelemetry
