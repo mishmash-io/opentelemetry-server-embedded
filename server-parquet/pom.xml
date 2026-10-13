@@ -75,6 +75,9 @@
   <properties>
     <parquet.version>1.18.1</parquet.version>
     <hadoop.version>3.5.0</hadoop.version>
+    <base.path>${project.build.directory}/opt/stacks</base.path>
+    <common.path>${base.path}/common</common.path>
+    <server.path>${base.path}/otlp-parquet-server</server.path>
   </properties>
 
   <build>
@@ -126,6 +129,56 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-deploy-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-config-files</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${server.path}/</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>etc</directory>
+                  <filtering>true</filtering>
+                  <targetPath>etc</targetPath>
+                </resource>
+                <resource>
+                  <directory>bin</directory>
+                  <filtering>true</filtering>
+                  <targetPath>bin</targetPath>
+                </resource>
+                <resource>
+                  <directory>conf</directory>
+                  <filtering>true</filtering>
+                  <targetPath>conf</targetPath>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copy-shell-profile</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${base.path}/</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>shellprofile.d</directory>
+                  <filtering>true</filtering>
+                  <targetPath>libexec/shellprofile.d</targetPath>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
