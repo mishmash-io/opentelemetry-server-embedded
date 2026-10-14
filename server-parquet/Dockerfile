@@ -12,6 +12,13 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+FROM mishmashio/stacks-base:latest AS base
+
+COPY target/server-parquet-*[0-9\.].jar /opt/stacks/otlp-server-parquet/lib/
+COPY . /tmp/server-parquet
+
+RUN cd /tmp/server-parquet && mvn --offline -Dbase.path="/opt/stacks" clean initialize
+
 FROM eclipse-temurin:25-jre-noble@sha256:d9a39a23634650173f1e2bbc176227af9728587ecf0f4b62d53e9355cd7a19ab AS server-parquet
 
 COPY --from=mishmashio/stacks-gson:latest /opt/stacks/ /opt/stacks/
@@ -24,15 +31,18 @@ COPY --from=mishmashio/stacks-jackson-yaml:latest /opt/stacks/ /opt/stacks/
 COPY --from=mishmashio/stacks-netty:latest /opt/stacks/ /opt/stacks/
 COPY --from=mishmashio/stacks-vertx-server-grpc:latest /opt/stacks/ /opt/stacks/
 COPY --from=mishmashio/stacks-vertx-server-web:latest /opt/stacks/ /opt/stacks/
+COPY --from=mishmashio/stacks-opentelemetry-api:latest /opt/stacks/ /opt/stacks/
 
 COPY --from=mishmashio/stacks-opentelemetry-agent:latest /opt/stacks/ /opt/stacks/
 COPY --from=mishmashio/stacks-shellprofiles-container:latest /opt/stacks/ /opt/stacks/
 
-COPY target/opt/stacks/ /opt/stacks/
+COPY --from=base /opt/stacks/ /opt/stacks/
+
 #ADD ./target/dependency /opt/server-parquet
 #COPY target/server-parquet-*.jar /opt/server-parquet
 #RUN mkdir /opt/opentelemetry
 #RUN mv /opt/server-parquet/opentelemetry-javaagent-*.jar /opt/opentelemetry/opentelemetry-javaagent.jar
+RUN chmod -R 755 "/opt/stacks/otlp-server-parquet/bin/otlp-server-parquet"
 RUN mkdir -p /parquet
 
 EXPOSE 4317 4318
@@ -43,5 +53,5 @@ ENV OTEL_EXPORTER_OTLP_PROTOCOL="grpc"
 ENV OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317"
 
 #ENTRYPOINT [ "/bin/sh", "-c", "java `[ \"$(echo $OWN_TELEMETRY_ENABLE | tr '[:lower:]' '[:upper:]')\" == \"TRUE\" ] && echo \"-javaagent:/opt/opentelemetry/opentelemetry-javaagent.jar\"` -cp /opt/server-parquet/\\* io.mishmash.opentelemetry.server.parquet.CollectorsMain" ]
-ENTRYPOINT ["/__cacert_entrypoint.sh", "/opt/stacks/otlp-parquet-server/bin/parquet-server.sh"]
+ENTRYPOINT ["/__cacert_entrypoint.sh", "/opt/stacks/otlp-server-parquet/bin/otlp-server-parquet"]
 CMD ["run"]

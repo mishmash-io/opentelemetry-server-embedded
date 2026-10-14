@@ -77,7 +77,7 @@
     <hadoop.version>3.5.0</hadoop.version>
     <base.path>${project.build.directory}/opt/stacks</base.path>
     <common.path>${base.path}/common</common.path>
-    <server.path>${base.path}/otlp-parquet-server</server.path>
+    <server.path>${base.path}/otlp-server-parquet</server.path>
   </properties>
 
   <build>
@@ -90,6 +90,72 @@
     </extensions>
 
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>get-jar-filenames</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <exportAntProperties>true</exportAntProperties>
+              <target>
+                <basename file="${io.mishmash.opentelemetry:server-parquet:jar}" property="dependencies.server-parquet"/>
+                <basename file="${io.mishmash.opentelemetry:collector-embedded:jar}" property="dependencies.collector-embedded"/>
+                <basename file="${io.mishmash.opentelemetry:persistence-protobuf:jar}" property="dependencies.persistence-protobuf"/>
+                <basename file="${io.opentelemetry.proto:opentelemetry-proto:jar}" property="dependencies.opentelemetry-proto"/>
+                <basename file="${io.vertx:vertx-launcher-application:jar}" property="dependencies.vertx-launcher"/>
+                <basename file="${info.picocli:picocli:jar}" property="dependencies.picocli"/>
+              </target>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-dependencies</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>io.mishmash.opentelemetry</groupId>
+                  <artifactId>collector-embedded</artifactId>
+                  <outputDirectory>${server.path}/lib</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>io.mishmash.opentelemetry</groupId>
+                  <artifactId>persistence-protobuf</artifactId>
+                  <outputDirectory>${server.path}/lib</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>io.opentelemetry.proto</groupId>
+                  <artifactId>opentelemetry-proto</artifactId>
+                  <outputDirectory>${server.path}/lib</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>io.vertx</groupId>
+                  <artifactId>vertx-launcher-application</artifactId>
+                  <outputDirectory>${server.path}/lib</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>info.picocli</groupId>
+                  <artifactId>picocli</artifactId>
+                  <outputDirectory>${server.path}/lib</outputDirectory>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -182,6 +248,16 @@
       </plugin>
     </plugins>
   </build>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>info.picocli</groupId>
+        <artifactId>picocli</artifactId>
+        <version>4.7.7</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
     <dependency>

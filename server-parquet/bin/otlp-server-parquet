@@ -14,7 +14,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-HADOOP_SHELL_EXECNAME="parquet-server"
+HADOOP_SHELL_EXECNAME="otlp-server-parquet"
 bin=$(cd -P -- "$(dirname -- "${BASH_SOURCE-$0}")" >/dev/null && pwd -P)
 
 function hadoop_usage
@@ -27,7 +27,7 @@ function hadoop_usage
   hadoop_generate_usage "${HADOOP_SHELL_EXECNAME}" false "COMMAND"
 }
 
-function server_parquet_case
+function otlp_server_parquet_case
 {
   subcmd=$1
   shift
@@ -68,7 +68,7 @@ HADOOP_NEW_CONFIG=true
 # Override some functions (in hadoop-functions) with quorum-specific versions
 HADOOP_CONF_DIR=@server.path@/conf
 
-. ${bin}/parquet-server-config.sh
+. ${bin}/otlp-server-parquet-config.sh
 
 hadoop_add_param HADOOP_OPTS Dlog4j.configurationFile "-Dlog4j.configurationFile=@server.path@/etc/log4j2.yaml"
 
@@ -93,11 +93,11 @@ hadoop_verify_user_perm "${HADOOP_SHELL_EXECNAME}" "${HADOOP_SUBCMD}"
 
 HADOOP_SUBCMD_ARGS=("$@")
 
-if declare -f server_parquet_command_"${HADOOP_SUBCMD}" >/dev/null 2>&1; then
-  hadoop_debug "Calling dynamically: server_parquet_command_${HADOOP_SUBCMD} ${HADOOP_SUBCMD_ARGS[*]}"
-  "server_parquet_command_${HADOOP_SUBCMD}" "${HADOOP_SUBCMD_ARGS[@]}"
+if declare -f otlp_server_parquet_command_"${HADOOP_SUBCMD}" >/dev/null 2>&1; then
+  hadoop_debug "Calling dynamically: otlp_server_parquet_command_${HADOOP_SUBCMD} ${HADOOP_SUBCMD_ARGS[*]}"
+  "otlp_server_parquet_command_${HADOOP_SUBCMD}" "${HADOOP_SUBCMD_ARGS[@]}"
 else
-  server_parquet_case "${HADOOP_SUBCMD}" "${HADOOP_SUBCMD_ARGS[@]}"
+  otlp_server_parquet_case "${HADOOP_SUBCMD}" "${HADOOP_SUBCMD_ARGS[@]}"
 fi
 
 hadoop_add_client_opts
